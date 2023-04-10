@@ -1,0 +1,12 @@
+3/13/2023, 7:15:34 AM: Error: Invalid login: 535 5.7.139 Authentication unsuccessful, the request did not meet the criteria to be authenticated successfully. Contact your administrator. [SI1PR02CA0043.apcprd02.prod.outlook.com 2023-03-13T00:15:34.556Z 08DB227936ADF84C]
+3/13/2023, 7:15:34 AM: Error: Error: Invalid login: 535 5.7.139 Authentication unsuccessful, the request did not meet the criteria to be authenticated successfully. Contact your administrator. [SI1PR02CA0043.apcprd02.prod.outlook.com 2023-03-13T00:15:34.556Z 08DB227936ADF84C]
+3/13/2023, 10:34:34 AM: ReferenceError: newLastNumber is not defined
+3/13/2023, 10:59:28 AM: Error: Invalid login: 535 5.7.139 Authentication unsuccessful, the request did not meet the criteria to be authenticated successfully. Contact your administrator. [SG2PR02CA0041.apcprd02.prod.outlook.com 2023-03-13T03:59:28.120Z 08DB230E63296EF7]
+3/13/2023, 10:59:28 AM: Error: Error: Invalid login: 535 5.7.139 Authentication unsuccessful, the request did not meet the criteria to be authenticated successfully. Contact your administrator. [SG2PR02CA0041.apcprd02.prod.outlook.com 2023-03-13T03:59:28.120Z 08DB230E63296EF7]
+3/13/2023, 11:21:36 AM: SequelizeDatabaseError: Data too long for column 'workNumber' at row 1
+3/13/2023, 11:22:14 AM: SequelizeDatabaseError: Data too long for column 'workNumber' at row 1
+3/13/2023, 11:22:38 AM: SequelizeDatabaseError: Data too long for column 'workNumber' at row 1
+3/13/2023, 11:23:15 AM: SequelizeDatabaseError: Data too long for column 'workNumber' at row 1
+3/13/2023, 11:27:20 AM: SequelizeDatabaseError: Data too long for column 'workNumber' at row 1
+3/13/2023, 11:29:44 AM: Error: Invalid login: 535 5.7.139 Authentication unsuccessful, the request did not meet the criteria to be authenticated successfully. Contact your administrator. [SI2PR02CA0004.apcprd02.prod.outlook.com 2023-03-13T04:29:44.603Z 08DB22ED5B7466C3]
+3/13/2023, 11:29:44 AM: Error: Error: Invalid login: 535 5.7.139 Authentication unsuccessful, the request did not meet the criteria to be authenticated successfully. Contact your administrator. [SI2PR02CA0004.apcprd02.prod.outlook.com 2023-03-13T04:29:44.603Z 08DB22ED5B7466C3]

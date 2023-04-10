@@ -1,0 +1,11 @@
+3/4/2023, 12:29:12 AM: TypeError: Cannot read properties of null (reading 'id')
+3/4/2023, 12:29:14 AM: TypeError: Cannot read properties of null (reading 'id')
+3/4/2023, 12:29:16 AM: TypeError: Cannot read properties of null (reading 'id')
+3/4/2023, 12:30:26 AM: TypeError: Cannot read properties of null (reading 'id')
+3/4/2023, 12:31:04 AM: TypeError: Cannot read properties of null (reading 'id')
+3/4/2023, 12:31:05 AM: TypeError: Cannot read properties of null (reading 'id')
+3/4/2023, 12:31:06 AM: TypeError: Cannot read properties of null (reading 'id')
+3/4/2023, 12:31:14 AM: TypeError: Cannot read properties of null (reading 'id')
+3/4/2023, 12:32:10 AM: TypeError: Cannot read properties of null (reading 'id')
+3/4/2023, 1:02:04 AM: ReferenceError: Cannot access 'userAcceptStatus' before initialization
+3/4/2023, 1:02:11 AM: ReferenceError: Cannot access 'userAcceptStatus' before initialization

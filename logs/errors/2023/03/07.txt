@@ -1,0 +1,11 @@
+3/7/2023, 3:26:31 AM: ReferenceError: acceptLevel is not defined
+3/7/2023, 4:20:33 AM: SequelizeDatabaseError: Lock wait timeout exceeded; try restarting transaction
+3/7/2023, 4:48:08 AM: ReferenceError: diffInMs is not defined
+3/7/2023, 4:48:14 AM: ReferenceError: diffInMs is not defined
+3/7/2023, 10:02:47 PM: SequelizeDatabaseError: Unknown column 'Ticket.$and' in 'where clause'
+3/7/2023, 10:03:22 PM: SequelizeDatabaseError: Unknown column 'Ticket.$and' in 'where clause'
+3/7/2023, 10:06:25 PM: SequelizeDatabaseError: Column 'createdAt' in where clause is ambiguous
+3/7/2023, 10:06:41 PM: SequelizeDatabaseError: Column 'createdAt' in where clause is ambiguous
+3/7/2023, 10:57:01 PM: ReferenceError: AssigneeId is not defined
+3/7/2023, 10:57:39 PM: ReferenceError: AssigneeId is not defined
+3/7/2023, 10:58:17 PM: ReferenceError: AssigneeId is not defined
