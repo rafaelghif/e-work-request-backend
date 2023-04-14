@@ -1,4 +1,4 @@
-import { validationResult } from "express-validator";
+import { validationResult } from "express-validator/src/validation-result.js";
 import { Op, QueryTypes } from "sequelize";
 import connectionDatabase from "../configs/database.js";
 import { errorLogging } from "../helpers/error.js";
@@ -37,10 +37,10 @@ export const getWorkRequest = async (req, res) => {
         const userLevelDb = responseSection.map((data) => parseInt(data.level));
 
         const accept = [
-            { level: [0, 1, 2], userLevel: 0, status: ["Request", "Progress", "Pending"] },
-            { level: [0, 1, 2], userLevel: 1, status: ["Request", "Progress", "Pending"] },
+            { level: [0, 1, 2], userLevel: 0, status: ["Approve", "Progress", "Pending"] },
+            { level: [0, 1, 2], userLevel: 1, status: ["Approve", "Progress", "Pending"] },
             { level: [0, 1, 2], userLevel: 2, status: ["Pending", "Progress"] },
-            { level: [0, 1], userLevel: 0, status: ["Request", "Progress", "Pending"] },
+            { level: [0, 1], userLevel: 0, status: ["Approve", "Progress", "Pending"] },
             { level: [0, 1], userLevel: 1, status: ["Pending", "Progress"] }
         ];
 
@@ -127,11 +127,19 @@ export const getWorkRequest = async (req, res) => {
                 include: [{
                     model: models.User,
                     attributes: ["id", "badgeId", "name"],
+                    as: "Approver"
+                }, {
+                    model: models.User,
+                    attributes: ["id", "badgeId", "name"],
                     as: "Assignee"
                 }, {
                     model: models.User,
                     attributes: ["id", "badgeId", "name"],
                     as: "PersonInCharge"
+                }, {
+                    model: models.Department,
+                    attributes: ["id", "name"],
+                    as: "ApproverDepartment"
                 }, {
                     model: models.Department,
                     attributes: ["id", "name"],
@@ -163,10 +171,10 @@ export const getWorkRequestCount = async (req, res) => {
         const userLevelDb = responseSection.map((data) => parseInt(data.level));
 
         const accept = [
-            { level: [0, 1, 2], userLevel: 0, status: ["Request", "Progress", "Pending"] },
-            { level: [0, 1, 2], userLevel: 1, status: ["Request", "Progress", "Pending"] },
+            { level: [0, 1, 2], userLevel: 0, status: ["Approve", "Progress", "Pending"] },
+            { level: [0, 1, 2], userLevel: 1, status: ["Approve", "Progress", "Pending"] },
             { level: [0, 1, 2], userLevel: 2, status: ["Pending", "Progress"] },
-            { level: [0, 1], userLevel: 0, status: ["Request", "Progress", "Pending"] },
+            { level: [0, 1], userLevel: 0, status: ["Approve", "Progress", "Pending"] },
             { level: [0, 1], userLevel: 1, status: ["Pending", "Progress"] }
         ];
 
@@ -230,6 +238,194 @@ export const getWorkRequestCount = async (req, res) => {
 
         return res.status(200).json({
             message: "Success Fetch Work Requests Count!",
+            data: response
+        });
+    } catch (err) {
+        errorLogging(err.toString());
+        return res.status(400).json({
+            isExpressValidation: false,
+            data: {
+                title: "Something Wrong!",
+                message: err.toString()
+            }
+        });
+    }
+}
+
+export const getTicketRequest = async (req, res) => {
+    try {
+        const { search } = req.query;
+
+        const { user, department, section } = req.decoded;
+        const responseSection = await connectionDatabase.query(`SELECT DISTINCT level FROM sections WHERE DepartmentId = '${department.id}' ORDER BY level ASC`, { type: QueryTypes.SELECT });
+        const userLevelDb = responseSection.map((data) => parseInt(data.level));
+
+        const accept = [
+            { level: [0, 1, 2], userLevel: 0, status: ["Waiting Approve"] },
+            { level: [0, 1, 2], userLevel: 1, status: ["Waiting Approve"] },
+            { level: [0, 1], userLevel: 0, status: ["Waiting Approve"] },
+        ];
+
+        const userAccept = accept.find(({ level, userLevel }) => level.every((value, index) => value === userLevelDb[index]) && userLevel === parseInt(section.level));
+        const { status: userAcceptStatus = [] } = userAccept || {};
+
+        let where = {
+            ticketStatus: {
+                [Op.in]: userAcceptStatus
+            },
+            inActive: false
+        }
+
+        if (search) {
+            where = {
+                ...where,
+                [Op.or]: [{
+                    ticketNumber: { [Op.like]: `%${search}%` }
+                }, {
+                    workNumber: { [Op.like]: `%${search}%` }
+                }, {
+                    title: { [Op.like]: `%${search}%` }
+                }, {
+                    jigToolNo: { [Op.like]: `%${search}%` }
+                }]
+            }
+        }
+
+        let whereTicketAssign = {
+            ApproverDepartmentId: department.id,
+            inActive: false,
+            status: {
+                [Op.ne]: "Complete"
+            }
+        }
+
+        const response = await models.Ticket.findAll({
+            order: [
+                ["expectDueDate", "ASC"]
+            ],
+            where,
+            include: [{
+                model: models.RegistrationNumber,
+                attributes: ["id", "name", "format", "lastNumber"]
+            }, {
+                model: models.User,
+                attributes: ["id", "badgeId", "name"],
+                as: "Requester"
+            }, {
+                model: models.User,
+                attributes: ["id", "badgeId", "name"],
+                as: "Receiver"
+            }, {
+                model: models.Department,
+                attributes: ["id", "name"],
+                as: "RequesterDepartment"
+            }, {
+                model: models.Department,
+                attributes: ["id", "name"],
+                as: "ReceiverDepartment"
+            }, {
+                model: models.Line,
+                attributes: ["id", "name"],
+                as: "RequesterLine"
+            }, {
+                model: models.TicketAssignee,
+                where: whereTicketAssign,
+                include: [{
+                    model: models.User,
+                    attributes: ["id", "badgeId", "name"],
+                    as: "Approver"
+                }, {
+                    model: models.User,
+                    attributes: ["id", "badgeId", "name"],
+                    as: "Assignee"
+                }, {
+                    model: models.User,
+                    attributes: ["id", "badgeId", "name"],
+                    as: "PersonInCharge"
+                }, {
+                    model: models.Department,
+                    attributes: ["id", "name"],
+                    as: "ApproverDepartment"
+                }, {
+                    model: models.Department,
+                    attributes: ["id", "name"],
+                    as: "AssigneeDepartment"
+                }]
+            }]
+        });
+
+        return res.status(200).json({
+            message: "Success Fetch Work Requests Requested!",
+            data: response
+        });
+    } catch (err) {
+        errorLogging(err.toString());
+        return res.status(400).json({
+            isExpressValidation: false,
+            data: {
+                title: "Something Wrong!",
+                message: err.toString()
+            }
+        });
+    }
+}
+
+export const getTicketRequestCount = async (req, res) => {
+    try {
+        const { user, department, section } = req.decoded;
+        const responseSection = await connectionDatabase.query(`SELECT DISTINCT level FROM sections WHERE DepartmentId = '${department.id}' ORDER BY level ASC`, { type: QueryTypes.SELECT });
+        const userLevelDb = responseSection.map((data) => parseInt(data.level));
+
+        const accept = [
+            { level: [0, 1, 2], userLevel: 0, status: ["Waiting Approve"] },
+            { level: [0, 1, 2], userLevel: 1, status: ["Waiting Approve"] },
+            { level: [0, 1], userLevel: 0, status: ["Waiting Approve"] },
+        ];
+
+        const userAccept = accept.find(({ level, userLevel }) => level.every((value, index) => value === userLevelDb[index]) && userLevel === parseInt(section.level));
+        const { status: userAcceptStatus = [] } = userAccept || {};
+
+        let where = {
+            ticketStatus: {
+                [Op.in]: userAcceptStatus
+            },
+            inActive: false
+        }
+
+        let whereTicketAssign = {
+            ApproverDepartmentId: department.id,
+            inActive: false,
+            status: {
+                [Op.ne]: "Complete"
+            }
+        }
+
+        const response = await models.Ticket.count({
+            order: [
+                ["expectDueDate", "ASC"]
+            ],
+            where,
+            include: [{
+                model: models.TicketAssignee,
+                where: whereTicketAssign,
+                include: [{
+                    model: models.User,
+                    attributes: ["id", "badgeId", "name"],
+                    as: "Assignee"
+                }, {
+                    model: models.User,
+                    attributes: ["id", "badgeId", "name"],
+                    as: "PersonInCharge"
+                }, {
+                    model: models.Department,
+                    attributes: ["id", "name"],
+                    as: "AssigneeDepartment"
+                }]
+            }]
+        });
+
+        return res.status(200).json({
+            message: "Success Fetch Work Requests Requested Count!",
             data: response
         });
     } catch (err) {
@@ -619,7 +815,7 @@ export const createWorkRequest = async (req, res) => {
 
         const { title, description, jigToolNo, qty, expectDueDate, RequesterDepartmentId, RequesterLineId, AssigneeDepartmentIds, RegistrationNumberId } = req.body;
         const { id, badgeId, name } = req.decoded.user;
-        const { name: DepartmentName } = req.decoded.department;
+        const { id: UserDepartmentId, name: DepartmentName } = req.decoded.department;
         const { name: LineName } = req.decoded.line;
 
         const responseWorkRequest = await models.Ticket.findOne({
@@ -665,7 +861,7 @@ export const createWorkRequest = async (req, res) => {
             throw new Error("Please fill Assignee Department");
         }
 
-        const assignDepartments = AssigneeDepartmentIds.map((res) => ({ AssigneeDepartmentId: res, createdBy: badgeId, updatedBy: badgeId, TicketId: response.id }));
+        const assignDepartments = AssigneeDepartmentIds.map((res) => ({ AssigneeDepartmentId: res, ApproverDepartmentId: UserDepartmentId, createdBy: badgeId, updatedBy: badgeId, TicketId: response.id }));
         await models.TicketAssignee.bulkCreate(assignDepartments, { transaction });
 
         await models.Comment.create({
@@ -691,6 +887,63 @@ export const createWorkRequest = async (req, res) => {
         return res.status(200).json({
             message: `Success Create Work Request! ${ticketNumber}`,
             data: response
+        });
+    } catch (err) {
+        await transaction.rollback();
+        errorLogging(err.toString());
+        return res.status(400).json({
+            isExpressValidation: false,
+            data: {
+                title: "Something Wrong!",
+                message: err.toString()
+            }
+        });
+    }
+}
+
+export const headActionTicket = async (req, res) => {
+    const transaction = await connectionDatabase.transaction();
+    try {
+        // Express Validator 
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                isExpressValidation: true,
+                data: {
+                    title: "Validation Errors!",
+                    message: "Validation Error!",
+                    validationError: errors.array()
+                }
+            });
+        }
+
+        const { id, type } = req.body;
+        const { id: UserId, badgeId, name } = req.decoded.user;
+
+        let commentTitle = type;
+        let commentText = `${badgeId} - ${name} has ${type} this ticket.`;
+
+        let updateData = {
+            ticketStatus: type,
+            updatedBy: badgeId
+        }
+
+        await models.Comment.create({
+            title: commentTitle,
+            text: commentText,
+            TicketId: id,
+            UserId: UserId,
+            createdBy: badgeId,
+            updatedBy: badgeId
+        }, { transaction });
+
+        await models.Ticket.update(updateData, { where: { id: id }, transaction });
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            message: commentText,
+            data: null
         });
     } catch (err) {
         await transaction.rollback();

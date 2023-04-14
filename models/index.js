@@ -96,14 +96,17 @@ models.Ticket.belongsTo(models.Department, { as: "ReceiverDepartment", foreignKe
 models.Ticket.hasMany(models.TicketAssignee);
 models.TicketAssignee.belongsTo(models.Ticket);
 
+models.User.hasMany(models.TicketAssignee, { as: "Approver", foreignKey: "ApproverId" });
 models.User.hasMany(models.TicketAssignee, { as: "Assignee", foreignKey: "AssigneeId" });
-models.TicketAssignee.belongsTo(models.User, { as: "Assignee", foreignKey: "AssigneeId" });
-
 models.User.hasMany(models.TicketAssignee, { as: "PersonInCharge", foreignKey: "PersonInChargeId" });
+models.TicketAssignee.belongsTo(models.User, { as: "Approver", foreignKey: "ApproverId" });
+models.TicketAssignee.belongsTo(models.User, { as: "Assignee", foreignKey: "AssigneeId" });
 models.TicketAssignee.belongsTo(models.User, { as: "PersonInCharge", foreignKey: "PersonInChargeId" });
 
-models.Department.hasMany(models.TicketAssignee, { as: "AssigneeDepartment",foreignKey:"AssigneeDepartmentId" });
-models.TicketAssignee.belongsTo(models.Department, { as: "AssigneeDepartment",foreignKey:"AssigneeDepartmentId" });
+models.Department.hasMany(models.TicketAssignee, { as: "ApproverDepartment", foreignKey: "ApproverDepartmentId" });
+models.Department.hasMany(models.TicketAssignee, { as: "AssigneeDepartment", foreignKey: "AssigneeDepartmentId" });
+models.TicketAssignee.belongsTo(models.Department, { as: "ApproverDepartment", foreignKey: "ApproverDepartmentId" });
+models.TicketAssignee.belongsTo(models.Department, { as: "AssigneeDepartment", foreignKey: "AssigneeDepartmentId" });
 
 models.Line.hasMany(models.Ticket, { as: "RequesterLine", foreignKey: "RequesterLineId" });
 models.Ticket.belongsTo(models.Line, { as: "RequesterLine", foreignKey: "RequesterLineId" });

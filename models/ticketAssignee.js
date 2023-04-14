@@ -9,6 +9,14 @@ const TicketAssignee = connectionDatabase.define("TicketAssignee", {
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
     },
+    ApproverId: {
+        type: DataTypes.CHAR(36),
+        allowNull: true,
+        defaultValue: null,
+        references: {
+            model: User
+        }
+    },
     AssigneeId: {
         type: DataTypes.CHAR(36),
         allowNull: true,
@@ -23,6 +31,13 @@ const TicketAssignee = connectionDatabase.define("TicketAssignee", {
         defaultValue: null,
         references: {
             model: User
+        }
+    },
+    ApproverDepartmentId: {
+        type: DataTypes.CHAR(36),
+        allowNull: false,
+        references: {
+            model: Department
         }
     },
     AssigneeDepartmentId: {

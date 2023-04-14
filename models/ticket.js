@@ -79,9 +79,9 @@ const Ticket = connectionDatabase.define("Ticket", {
         defaultValue: null
     },
     ticketStatus: {
-        type: DataTypes.ENUM("Request", "Progress", "Send to the Requestor", "Complete", "Reject"),
+        type: DataTypes.ENUM("Waiting Approve", "Approve", "Progress", "Send to the Requestor", "Complete", "Reject"),
         allowNull: false,
-        defaultValue: "Request"
+        defaultValue: "Waiting Approve"
     },
     sendToRequestorDate: {
         type: DataTypes.DATE,
