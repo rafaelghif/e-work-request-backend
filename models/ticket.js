@@ -20,10 +20,6 @@ const Ticket = connectionDatabase.define("Ticket", {
         allowNull: true,
         defaultValue: null,
     },
-    title: {
-        type: DataTypes.STRING(50),
-        allowNull: false
-    },
     description: {
         type: DataTypes.STRING(80),
         allowNull: false
@@ -90,6 +86,11 @@ const Ticket = connectionDatabase.define("Ticket", {
     },
     completeDate: {
         type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null
+    },
+    attachmentFile: {
+        type: DataTypes.STRING,
         allowNull: true,
         defaultValue: null
     },

@@ -6,6 +6,7 @@ import RegistrationNumber from "./registrationNumber.js";
 import Section from "./section.js";
 import Ticket from "./ticket.js";
 import TicketAssignee from "./ticketAssignee.js";
+import TicketOld from "./ticketOld.js";
 import User from "./user.js";
 
 const models = {}
@@ -18,6 +19,7 @@ models.RegistrationNumber = RegistrationNumber;
 models.Ticket = Ticket;
 models.TicketAssignee = TicketAssignee;
 models.Comment = Comment;
+models.TicketOld = TicketOld;
 
 // connectionDatabase.sync({ force: true }).then(async () => {
 //     const responseDepartment = await models.Department.create({

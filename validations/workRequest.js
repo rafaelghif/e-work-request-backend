@@ -1,7 +1,6 @@
 import { body, param } from "express-validator";
 
 export const createWorkRequestRule = [
-    body("title").notEmpty().withMessage("Title Cannot Be Null!"),
     body("description").notEmpty().withMessage("Description Cannot Be Null!"),
     body("jigToolNo").notEmpty().withMessage("Jig Toll No Cannot Be Null!"),
     body("qty").notEmpty().withMessage("Qty Cannot Be Null!").toInt(),

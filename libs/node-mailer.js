@@ -1,11 +1,13 @@
+import * as dotenv from "dotenv";
+dotenv.config();
 import * as nodemailer from "nodemailer";
 
 export const transporter = nodemailer.createTransport({
-    host: "smtp.office365.com",
-    port: 587,
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
     secure: false,
     auth: {
-        user: `YAS-ID-ITD@yokogawa.com`,
-        pass: `ymb2000~~`,
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD,
     },
 });

@@ -35,8 +35,8 @@ app.use(cors());
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(morgan("combined", { stream: accessLogStream }));
 app.use(express.static("public"));
-app.use(express.json({ limit: "100mb" }));
-app.use(express.urlencoded({ extended: true, limit: "100mb" }));
+app.use(express.json({ limit: "25mb" }));
+app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 
 const httpServer = createServer(app);
 const PORT = process.env.APP_PORT ?? 8081;

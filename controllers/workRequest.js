@@ -4,6 +4,8 @@ import connectionDatabase from "../configs/database.js";
 import { errorLogging } from "../helpers/error.js";
 import { transporter } from "../libs/node-mailer.js";
 import models from "../models/index.js";
+import { mkdir } from "fs/promises";
+import { copyFile, unlink } from "fs";
 
 const generateTicketNumber = (data) => {
     const { ticketNumber } = data;
@@ -813,7 +815,7 @@ export const createWorkRequest = async (req, res) => {
             });
         }
 
-        const { title, description, jigToolNo, qty, expectDueDate, RequesterDepartmentId, RequesterLineId, AssigneeDepartmentIds, RegistrationNumberId } = req.body;
+        const { description, jigToolNo, qty, expectDueDate, RequesterDepartmentId, RequesterLineId, AssigneeDepartmentIds, RegistrationNumberId } = req.body;
         const { id, badgeId, name } = req.decoded.user;
         const { id: UserDepartmentId, name: DepartmentName } = req.decoded.department;
         const { name: LineName } = req.decoded.line;
@@ -841,10 +843,34 @@ export const createWorkRequest = async (req, res) => {
             newWorkNumber = `${format}-${stringYear}-${"1".toString().padStart(3, "0")}`;
         }
 
+        let attachmentFile = undefined;
+
+        if (req?.file?.filename) {
+            let fileNamesArr = req.file.filename.split(".");
+            let ext = fileNamesArr[fileNamesArr.length - 1].toLowerCase();
+
+            const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+            attachmentFile = `${format}-${currentYear}-${uniqueSuffix}.${ext}`;
+            let destinationDirectory = `public/files/${format}/${currentYear}`;
+
+            await mkdir(destinationDirectory, { recursive: true });
+            copyFile(`public/files/${req.file.filename}`, `${destinationDirectory}/${attachmentFile}`, (err) => {
+                if (err) {
+                    errorLogging(err)
+                }
+            });
+            unlink(`public/files/${req.file.filename}`, (err) => {
+                if (err) {
+                    errorLogging(err);
+                }
+            });
+
+            attachmentFile = `${format}/${currentYear}/${attachmentFile}`;
+        }
+
         const response = await models.Ticket.create({
             ticketNumber,
             workNumber: newWorkNumber,
-            title,
             description,
             jigToolNo,
             qty,
@@ -855,6 +881,7 @@ export const createWorkRequest = async (req, res) => {
             RegistrationNumberId,
             createdBy: badgeId,
             updatedBy: badgeId,
+            attachmentFile,
         }, { transaction });
 
         if (AssigneeDepartmentIds.length === 0) {
@@ -1070,7 +1097,7 @@ export const picActionTicket = async (req, res) => {
             });
         }
 
-        const { id, ticketAssigneeId, ticketStatus, timeTaken, remark } = req.body;
+        const { id, ticketAssigneeId, ticketStatus, timeTaken, actionTaken, remark } = req.body;
         const { id: UserId, badgeId, name } = req.decoded.user;
 
         let commentTitle = "Complete";
@@ -1096,6 +1123,7 @@ export const picActionTicket = async (req, res) => {
             await models.TicketAssignee.update({
                 status: ticketStatus,
                 timeTaken: timeTaken,
+                actionTaken: actionTaken,
                 updatedBy: badgeId
             }, { where: { id: ticketAssigneeId }, transaction });
             await models.Ticket.update({ updatedBy: badgeId }, { where: { id: id }, transaction });

@@ -57,6 +57,11 @@ const TicketAssignee = connectionDatabase.define("TicketAssignee", {
         allowNull: true,
         defaultValue: null
     },
+    actionTaken: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
+    },
     timeTaken: {
         type: DataTypes.STRING,
         allowNull: true

@@ -11,9 +11,10 @@ module.exports = {
       DEV_DATABASE: "ymb_e_work_request",
       DEV_USERNAME: "root",
       DEV_PASSWORD: "",
-      CANIS1: "\\\\10.137.1.34\\CanisData\\",
-      CANIS2: "\\\\10.137.1.33\\CanisData\\",
-      DUMMY: "\\\\10.137.1.34\\CanisData\\"
+      MAIL_HOST: "smtp.office365.com",
+      MAIL_PORT: 587,
+      MAIL_USERNAME: "test@mail.com",
+      MAIL_PASSWORD: "test",
     },
     env_production: {
       NODE_ENV: "Production",
@@ -24,9 +25,10 @@ module.exports = {
       PROD_DATABASE: "ymb_e_work_request",
       PROD_USERNAME: "semiroot",
       PROD_PASSWORD: "Adm!n@20*",
-      CANIS1: "\\\\10.137.1.34\\CanisData\\",
-      CANIS2: "\\\\10.137.1.33\\CanisData\\",
-      DUMMY: "\\\\10.137.1.34\\CanisData\\"
+      MAIL_HOST: "smtp.office365.com",
+      MAIL_PORT: 587,
+      MAIL_USERNAME: "test@mail.com",
+      MAIL_PASSWORD: "test",
     }
   }],
 };
