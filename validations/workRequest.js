@@ -43,4 +43,13 @@ export const receiveTicketRule = [
 export const getWorkRequestCommentRule = [
     param("TicketId").notEmpty().withMessage("WorkRequestId Cannot Be Null!")
         .isUUID("4").withMessage("Invalid WorkRequestId"),
-]
+];
+
+export const updateWorkRequestRule = [
+    body("id").notEmpty().withMessage("WorkRequestId Cannot Be Null!")
+        .isUUID("4").withMessage("Invalid WorkRequestId"),
+    body("description").notEmpty().withMessage("Description Cannot Be Null!"),
+    body("jigToolNo").notEmpty().withMessage("Jig Toll No Cannot Be Null!"),
+    body("qty").notEmpty().withMessage("Qty Cannot Be Null!").toInt(),
+    body("expectDueDate").notEmpty().withMessage("Expect Due Date Cannot Be Null!"),
+];

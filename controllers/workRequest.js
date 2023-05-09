@@ -30,6 +30,42 @@ const generateTicketNumber = (data) => {
     return newTicketNumber;
 }
 
+export const getTicketNumber = async (req, res) => {
+    try {
+        const { search } = req.query;
+        let where = {
+            inActive: false
+        }
+
+        if (search) {
+            where = {
+                ...where,
+                ticketNumber: { [Op.like]: `%${search}%` }
+            }
+        }
+
+        const response = await models.Ticket.findAll({
+            attributes: ["id", "ticketNumber", "description", "jigToolNo", "qty", "expectDueDate", "attachmentFile"],
+            order: [["ticketNumber", "ASC"]],
+            where
+        });
+
+        return res.status(200).json({
+            message: "Success Fetch Ticket Number!",
+            data: response
+        });
+    } catch (err) {
+        errorLogging(err.toString());
+        return res.status(400).json({
+            isExpressValidation: false,
+            data: {
+                title: "Something Wrong!",
+                message: err.toString()
+            }
+        });
+    }
+}
+
 export const getWorkRequest = async (req, res) => {
     try {
         const { search } = req.query;
@@ -646,11 +682,51 @@ export const getWorkRequestMonth = async (req, res) => {
     }
 }
 
+export const getWorkRequestType = async (req, res) => {
+    try {
+        const response = await connectionDatabase.query("SELECT DISTINCT id,format FROM registrationnumbers WHERE id IN (SELECT DISTINCT RegistrationNumberId FROM tickets) ORDER BY format ASC", { type: QueryTypes.SELECT });
+        const data = response.map((data) => ({ id: data.id, format: data.format }));
+        return res.status(200).json({
+            message: "Success Fetch Work Request Type!",
+            data: data
+        });
+    } catch (err) {
+        errorLogging(err.toString());
+        return res.status(400).json({
+            isExpressValidation: false,
+            data: {
+                title: "Something Wrong!",
+                message: err.toString()
+            }
+        });
+    }
+}
+
+export const getWorkRequestDepartment = async (req, res) => {
+    try {
+        const response = await connectionDatabase.query("SELECT DISTINCT id,name FROM departments WHERE id IN (SELECT DISTINCT RequesterDepartmentId FROM tickets) ORDER BY name ASC", { type: QueryTypes.SELECT });
+        const data = response.map((data) => ({ id: data.id, name: data.name }));
+        return res.status(200).json({
+            message: "Success Fetch Work Request Department!",
+            data: data
+        });
+    } catch (err) {
+        errorLogging(err.toString());
+        return res.status(400).json({
+            isExpressValidation: false,
+            data: {
+                title: "Something Wrong!",
+                message: err.toString()
+            }
+        });
+    }
+}
+
 export const getWorkRequests = async (req, res) => {
     try {
         const { search } = req.query;
 
-        const { ticketStatus, year, month } = req.params;
+        const { ticketStatus, type, department, year, month } = req.params;
         const currentDate = new Date();
 
         let where = {
@@ -674,6 +750,14 @@ export const getWorkRequests = async (req, res) => {
 
         if (ticketStatus && ticketStatus !== "All") {
             where.ticketStatus = ticketStatus;
+        }
+
+        if (type && type !== "All") {
+            where.RegistrationNumberId = type;
+        }
+
+        if (department && department !== "All") {
+            where.RequesterDepartmentId = department;
         }
 
         const yearFilter = parseInt(year) || currentDate.getFullYear();
@@ -910,7 +994,6 @@ export const createWorkRequest = async (req, res) => {
         // const userEmail = responseUser.map((data) => data.email);
         // await sendMailCreateWorkRequest(userEmail, badgeId, name, DepartmentName, LineName, title, description, jigToolNo, qty, expectDueDate);
         await transaction.commit();
-
         return res.status(200).json({
             message: `Success Create Work Request! ${ticketNumber}`,
             data: response
@@ -1322,5 +1405,110 @@ export const sendMailCreateWorkRequest = async (email, badgeId, name, department
     } catch (err) {
         errorLogging(err.toString());
         throw new Error(err.toString());
+    }
+}
+
+export const updateWorkRequest = async (req, res) => {
+    const transaction = await connectionDatabase.transaction();
+    try {
+        // Express Validator 
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                isExpressValidation: true,
+                data: {
+                    title: "Validation Errors!",
+                    message: "Validation Error!",
+                    validationError: errors.array()
+                }
+            });
+        }
+
+        const { id, ticketNumber, description, jigToolNo, qty, expectDueDate } = req.body;
+        const { id: UserId, badgeId, name } = req.decoded.user;
+
+        let commentTitle = "Update";
+        let commentText = `${badgeId} - ${name} has update this ticket.`;
+
+        await models.Comment.create({
+            title: commentTitle,
+            text: commentText,
+            TicketId: id,
+            UserId: UserId,
+            createdBy: badgeId,
+            updatedBy: badgeId
+        }, { transaction });
+
+        let updateData = {
+            ticketNumber,
+            description,
+            jigToolNo,
+            qty,
+            expectDueDate
+        };
+
+        let attachmentFile = undefined;
+
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const stringYear = currentYear.toString().substring(2, 4).padStart(2, "0");
+
+        if (req?.file?.filename) {
+
+            const responseTicket = await models.Ticket.findByPk(id);
+            const responseRegistrationNumber = await models.RegistrationNumber.findByPk(responseTicket.RegistrationNumberId);
+
+            const { format } = responseRegistrationNumber;
+
+            let fileNamesArr = req.file.filename.split(".");
+            let ext = fileNamesArr[fileNamesArr.length - 1].toLowerCase();
+
+            const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+            attachmentFile = `${format}-${currentYear}-${uniqueSuffix}.${ext}`;
+            let destinationDirectory = `public/files/${format}/${currentYear}`;
+
+            await mkdir(destinationDirectory, { recursive: true });
+            copyFile(`public/files/${req.file.filename}`, `${destinationDirectory}/${attachmentFile}`, (err) => {
+                if (err) {
+                    errorLogging(err)
+                }
+            });
+            unlink(`public/files/${req.file.filename}`, (err) => {
+                if (err) {
+                    errorLogging(err);
+                }
+            });
+
+            attachmentFile = `${format}/${currentYear}/${attachmentFile}`;
+        }
+
+        if (attachmentFile !== undefined) {
+            updateData = { ...updateData, attachmentFile };
+        }
+
+        console.log({ updateData });
+
+        await models.Ticket.update(updateData, {
+            where: {
+                id: id
+            }, transaction
+        })
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            message: commentText,
+            data: null
+        });
+    } catch (err) {
+        transaction.rollback();
+        errorLogging(err.toString());
+        return res.status(400).json({
+            isExpressValidation: false,
+            data: {
+                title: "Something Wrong!",
+                message: err.toString()
+            }
+        });
     }
 }

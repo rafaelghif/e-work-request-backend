@@ -1,8 +1,8 @@
 import { Router } from "express";
 import multer from "multer";
-import { assignTicket, createWorkRequest, getTicketRequest, getTicketRequestCount, getWorkRequest, getWorkRequestComment, getWorkRequestCount, getWorkRequestMonth, getWorkRequestReceive, getWorkRequestReceiveCount, getWorkRequests, getWorkRequestYear, headActionTicket, picActionTicket, receiveTicket } from "../controllers/workRequest.js";
+import { assignTicket, createWorkRequest, getTicketNumber, getTicketRequest, getTicketRequestCount, getWorkRequest, getWorkRequestComment, getWorkRequestCount, getWorkRequestDepartment, getWorkRequestMonth, getWorkRequestReceive, getWorkRequestReceiveCount, getWorkRequests, getWorkRequestType, getWorkRequestYear, headActionTicket, picActionTicket, receiveTicket, updateWorkRequest } from "../controllers/workRequest.js";
 import { authVerify } from "../middlewares/auth.js";
-import { assignTicketRule, createWorkRequestRule, getWorkRequestCommentRule, headActionTicketRule, picActionTicketRule, receiveTicketRule } from "../validations/workRequest.js";
+import { assignTicketRule, createWorkRequestRule, updateWorkRequestRule, getWorkRequestCommentRule, headActionTicketRule, picActionTicketRule, receiveTicketRule } from "../validations/workRequest.js";
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -28,8 +28,11 @@ const workRequestRouter = Router();
 
 workRequestRouter.get("/year", [authVerify, getWorkRequestYear]);
 workRequestRouter.get("/month", [authVerify, getWorkRequestMonth]);
-workRequestRouter.get("/all/ticketStatus/:ticketStatus/year/:year/month/:month", [authVerify, getWorkRequests]);
+workRequestRouter.get("/type", [authVerify, getWorkRequestType]);
+workRequestRouter.get("/department", [authVerify, getWorkRequestDepartment]);
+workRequestRouter.get("/all/ticketStatus/:ticketStatus/type/:type/department/:department/year/:year/month/:month", [authVerify, getWorkRequests]);
 workRequestRouter.get("/comment/ticketId/:TicketId", [authVerify, getWorkRequestCommentRule, getWorkRequestComment]);
+workRequestRouter.get("/ticket-number", [authVerify, getTicketNumber]);
 workRequestRouter.get("/", [authVerify, getWorkRequest]);
 workRequestRouter.get("/count", [authVerify, getWorkRequestCount]);
 workRequestRouter.get("/ticket-request", [authVerify, getTicketRequest]);
@@ -37,6 +40,7 @@ workRequestRouter.get("/ticket-request/count", [authVerify, getTicketRequestCoun
 workRequestRouter.get("/receive", [authVerify, getWorkRequestReceive]);
 workRequestRouter.get("/count-receive", [authVerify, getWorkRequestReceiveCount]);
 workRequestRouter.post("/create", [authVerify, upload.single("attachmentFile"), createWorkRequestRule, createWorkRequest]);
+workRequestRouter.patch("/update", [authVerify, upload.single("attachmentFile"), updateWorkRequestRule, updateWorkRequest]);
 workRequestRouter.patch("/head-action", [authVerify, headActionTicketRule, headActionTicket]);
 workRequestRouter.patch("/assign", [authVerify, assignTicketRule, assignTicket]);
 workRequestRouter.patch("/pic-action", [authVerify, picActionTicketRule, picActionTicket]);

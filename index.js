@@ -25,7 +25,7 @@ const accessLogStream = createStream("access.log", {
 
 const limiter = rateLimit({
     windowMs: 1 * 60 * 1000,
-    max: 65,
+    max: 70,
     standardHeaders: true,
     legacyHeaders: false
 });
