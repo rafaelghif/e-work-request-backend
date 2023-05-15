@@ -1451,7 +1451,6 @@ export const updateWorkRequest = async (req, res) => {
 
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
-        const stringYear = currentYear.toString().substring(2, 4).padStart(2, "0");
 
         if (req?.file?.filename) {
 
@@ -1485,8 +1484,6 @@ export const updateWorkRequest = async (req, res) => {
         if (attachmentFile !== undefined) {
             updateData = { ...updateData, attachmentFile };
         }
-
-        console.log({ updateData });
 
         await models.Ticket.update(updateData, {
             where: {

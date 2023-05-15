@@ -8,17 +8,17 @@ const TicketOld = connectionDatabase.define("TicketOld", {
         defaultValue: DataTypes.UUIDV4
     },
     ticketNo: {
-        type: DataTypes.STRING(15),
+        type: DataTypes.STRING(30),
         allowNull: true,
         defaultValue: null
     },
     location: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(150),
         allowNull: true,
         defaultValue: null
     },
     description: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(300),
         allowNull: false,
     },
     remark: {

@@ -73,7 +73,7 @@ export const getPics = async (req, res) => {
                 attributes: [],
                 where: {
                     level: {
-                        [Op.gt]: section.level
+                        [Op.gte]: section.level
                     },
                     inActive: false
                 }
