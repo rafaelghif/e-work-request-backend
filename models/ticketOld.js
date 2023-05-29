@@ -7,6 +7,11 @@ const TicketOld = connectionDatabase.define("TicketOld", {
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
     },
+    woNo: {
+        type: DataTypes.STRING(30),
+        allowNull: true,
+        defaultValue: null
+    },
     ticketNo: {
         type: DataTypes.STRING(30),
         allowNull: true,
@@ -39,6 +44,20 @@ const TicketOld = connectionDatabase.define("TicketOld", {
     ticketType: {
         type: DataTypes.STRING(15),
         allowNull: false
+    },
+    createdBy: {
+        type: DataTypes.STRING(8),
+        allowNull: false,
+        validate: {
+            min: 8
+        }
+    },
+    updatedBy: {
+        type: DataTypes.STRING(8),
+        allowNull: false,
+        validate: {
+            min: 8
+        }
     }
 });
 

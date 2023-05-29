@@ -6,6 +6,7 @@ import path from "path";
 import * as fns from "date-fns";
 import connectionDatabase from "../configs/database.js";
 import { Op } from "sequelize";
+import { validationResult } from "express-validator/src/validation-result.js";
 
 export const formatDate = (stringDate, cols, ticketType) => {
     try {
@@ -36,6 +37,8 @@ export const getTickets = async (req, res) => {
         if (search) {
             where = {
                 [Op.or]: [{
+                    woNo: { [Op.like]: `%${search}%` }
+                }, {
                     ticketNo: { [Op.like]: `%${search}%` }
                 }, {
                     location: { [Op.like]: `%${search}%` }
@@ -89,6 +92,51 @@ export const getTickets = async (req, res) => {
     }
 }
 
+export const updateTicket = async (req, res) => {
+    try {
+        // Express Validator 
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                isExpressValidation: true,
+                data: {
+                    title: "Validation Errors!",
+                    message: "Validation Error!",
+                    validationError: errors.array()
+                }
+            });
+        }
+
+        const { id, ticketNo, location, description, remark, receivedDate, completedDate } = req.body;
+        const { badgeId } = req.decoded.user;
+
+        await models.TicketOld.update({
+            location,
+            description,
+            remark,
+            receivedDate,
+            completedDate,
+            updatedBy: badgeId
+        }, {
+            where: { id }
+        })
+
+        return res.status(200).json({
+            message: `Success Update Work Request old! ${ticketNo}`,
+            data: null
+        });
+    } catch (err) {
+        errorLogging(err.toString());
+        return res.status(400).json({
+            isExpressValidation: false,
+            data: {
+                title: "Something Wrong!",
+                message: err.toString()
+            }
+        });
+    }
+}
+
 export const importTicket = async (req, res) => {
     try {
         const directoryPath = "D:/40703191/Programming/NodeJS/Personal/e-work-request/e-work-request-backend/public/ticket/old";
@@ -97,28 +145,28 @@ export const importTicket = async (req, res) => {
 
         const data = [{
             type: "FJ",
-            fileName: "WO-FJ Fabrication of Jig (New Jig) (form go to Tooling).xlsx"
+            fileName: "WO-FJ Fabrication of Jig (New Jig).xlsx"
         }, {
             type: "MB",
-            fileName: "WO-MB Maintenance for Bending Tools (form go to Tooling).xlsx"
+            fileName: "WO-MB Maintenance for Bending Tools.xlsx"
         }, {
             type: "MD",
-            fileName: "WO-MD Maintenance for Mold Die (form go to Tooling).xlsx"
+            fileName: "WO-MD Maintenance for Mold Die.xlsx"
         }, {
             type: "MG",
             fileName: "WO-MG Maintenance for General work for factory facility.xlsx"
         }, {
             type: "MJ",
-            fileName: "WO-MJ Maintenance for Jig (form go to Tooling).xlsx"
+            fileName: "WO-MJ Maintenance for Jig.xlsx"
         }, {
             type: "MM",
-            fileName: "WO-MM Repair of Machine  production tools (form go to Maintenance).xlsx"
+            fileName: "WO-MM Repair of Machine  production tools.xlsx"
         }, {
             type: "MP",
-            fileName: "WO-MP Maintenance for Press Die (form go to Tooling).xlsx"
+            fileName: "WO-MP Maintenance for Press Die.xlsx"
         }, {
             type: "NY",
-            fileName: "WO-NY Maintenance for NCT Tools (form go to Tooling).xlsx"
+            fileName: "WO-NY Maintenance for NCT Tools.xlsx"
         }, {
             type: "WS",
             fileName: "WO-WS Request for creating a new or revising worksheet (form go to PED).xlsx"
@@ -134,6 +182,7 @@ export const importTicket = async (req, res) => {
             sheets.map(async (sheet) => {
                 const rows = XLSX.utils.sheet_to_json(file.Sheets[sheet]);
                 for (const cols of rows) {
+                    console.log({ cols });
                     if (cols["Description Of Problem"]) {
                         if (cols["Description Of Problem"] === "") {
                             break;
@@ -142,6 +191,8 @@ export const importTicket = async (req, res) => {
                         if (cols["Description Of Problem"] && !cols["Location"]) {
                             continue;
                         }
+
+                        const woNo = cols["WORK ORDER REGISTRATION"] ? cols["WORK ORDER REGISTRATION"].trim() : "";
                         const workOrderNo = cols["No."] ? cols["No."].trim() : "";
                         const location = cols["Location"].trim();
                         const description = cols["Description Of Problem"].trim();
@@ -150,13 +201,16 @@ export const importTicket = async (req, res) => {
                         const remark = cols["Remarks"] ? cols["Remarks"].trim() : null;
 
                         await models.TicketOld.create({
+                            woNo,
                             ticketNo: workOrderNo,
                             location,
                             description,
                             remark,
                             receivedDate,
                             completedDate,
-                            ticketType
+                            ticketType,
+                            createdBy: "SYSTEM",
+                            updatedBy: "SYSTEM"
                         }, { logging: false });
                     }
 
@@ -174,6 +228,7 @@ export const importTicket = async (req, res) => {
                             continue;
                         }
 
+                        const woNo = cols["WORK ORDER REGISTRATION"] ? cols["WORK ORDER REGISTRATION"].trim() : "";
                         const workOrderNo = cols["__EMPTY"] ? cols["__EMPTY"].toString().trim() : "";
                         const location = cols["__EMPTY_1"].toString().trim();
                         const description = cols["__EMPTY_2"].toString().trim();
@@ -182,13 +237,16 @@ export const importTicket = async (req, res) => {
                         const remark = cols["__EMPTY_5"] ? cols["__EMPTY_5"].toString().trim() : null;
 
                         await models.TicketOld.create({
+                            woNo,
                             ticketNo: workOrderNo,
                             location,
                             description,
                             remark,
                             receivedDate,
                             completedDate,
-                            ticketType
+                            ticketType,
+                            createdBy: "SYSTEM",
+                            updatedBy: "SYSTEM"
                         }, { logging: false });
                     }
                 }

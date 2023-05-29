@@ -4,8 +4,6 @@ import connectionDatabase from "../configs/database.js";
 import { errorLogging } from "../helpers/error.js";
 import { transporter } from "../libs/node-mailer.js";
 import models from "../models/index.js";
-import { mkdir } from "fs/promises";
-import { copyFile, unlink } from "fs";
 
 const generateTicketNumber = (data) => {
     const { ticketNumber } = data;
@@ -430,36 +428,11 @@ export const getTicketRequestCount = async (req, res) => {
             inActive: false
         }
 
-        let whereTicketAssign = {
-            ApproverDepartmentId: department.id,
-            inActive: false,
-            status: {
-                [Op.ne]: "Complete"
-            }
-        }
-
         const response = await models.Ticket.count({
             order: [
                 ["expectDueDate", "ASC"]
             ],
-            where,
-            include: [{
-                model: models.TicketAssignee,
-                where: whereTicketAssign,
-                include: [{
-                    model: models.User,
-                    attributes: ["id", "badgeId", "name"],
-                    as: "Assignee"
-                }, {
-                    model: models.User,
-                    attributes: ["id", "badgeId", "name"],
-                    as: "PersonInCharge"
-                }, {
-                    model: models.Department,
-                    attributes: ["id", "name"],
-                    as: "AssigneeDepartment"
-                }]
-            }]
+            where
         });
 
         return res.status(200).json({
@@ -930,26 +903,7 @@ export const createWorkRequest = async (req, res) => {
         let attachmentFile = undefined;
 
         if (req?.file?.filename) {
-            let fileNamesArr = req.file.filename.split(".");
-            let ext = fileNamesArr[fileNamesArr.length - 1].toLowerCase();
-
-            const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
-            attachmentFile = `${format}-${currentYear}-${uniqueSuffix}.${ext}`;
-            let destinationDirectory = `public/files/${format}/${currentYear}`;
-
-            await mkdir(destinationDirectory, { recursive: true });
-            copyFile(`public/files/${req.file.filename}`, `${destinationDirectory}/${attachmentFile}`, (err) => {
-                if (err) {
-                    errorLogging(err)
-                }
-            });
-            unlink(`public/files/${req.file.filename}`, (err) => {
-                if (err) {
-                    errorLogging(err);
-                }
-            });
-
-            attachmentFile = `${format}/${currentYear}/${attachmentFile}`;
+            attachmentFile = req.file.filename;
         }
 
         const response = await models.Ticket.create({
@@ -1449,36 +1403,8 @@ export const updateWorkRequest = async (req, res) => {
 
         let attachmentFile = undefined;
 
-        const currentDate = new Date();
-        const currentYear = currentDate.getFullYear();
-
         if (req?.file?.filename) {
-
-            const responseTicket = await models.Ticket.findByPk(id);
-            const responseRegistrationNumber = await models.RegistrationNumber.findByPk(responseTicket.RegistrationNumberId);
-
-            const { format } = responseRegistrationNumber;
-
-            let fileNamesArr = req.file.filename.split(".");
-            let ext = fileNamesArr[fileNamesArr.length - 1].toLowerCase();
-
-            const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
-            attachmentFile = `${format}-${currentYear}-${uniqueSuffix}.${ext}`;
-            let destinationDirectory = `public/files/${format}/${currentYear}`;
-
-            await mkdir(destinationDirectory, { recursive: true });
-            copyFile(`public/files/${req.file.filename}`, `${destinationDirectory}/${attachmentFile}`, (err) => {
-                if (err) {
-                    errorLogging(err)
-                }
-            });
-            unlink(`public/files/${req.file.filename}`, (err) => {
-                if (err) {
-                    errorLogging(err);
-                }
-            });
-
-            attachmentFile = `${format}/${currentYear}/${attachmentFile}`;
+            attachmentFile = req.file.filename;
         }
 
         if (attachmentFile !== undefined) {
