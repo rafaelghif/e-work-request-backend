@@ -98,7 +98,7 @@ export const getWorkRequest = async (req, res) => {
                 }, {
                     workNumber: { [Op.like]: `%${search}%` }
                 }, {
-                    title: { [Op.like]: `%${search}%` }
+                    description: { [Op.like]: `%${search}%` }
                 }, {
                     jigToolNo: { [Op.like]: `%${search}%` }
                 }]
@@ -309,6 +309,7 @@ export const getTicketRequest = async (req, res) => {
             ticketStatus: {
                 [Op.in]: userAcceptStatus
             },
+            RequesterDepartmentId: department.id,
             inActive: false
         }
 
@@ -320,7 +321,7 @@ export const getTicketRequest = async (req, res) => {
                 }, {
                     workNumber: { [Op.like]: `%${search}%` }
                 }, {
-                    title: { [Op.like]: `%${search}%` }
+                    description: { [Op.like]: `%${search}%` }
                 }, {
                     jigToolNo: { [Op.like]: `%${search}%` }
                 }]
@@ -425,6 +426,7 @@ export const getTicketRequestCount = async (req, res) => {
             ticketStatus: {
                 [Op.in]: userAcceptStatus
             },
+            RequesterDepartmentId: department.id,
             inActive: false
         }
 
@@ -432,7 +434,7 @@ export const getTicketRequestCount = async (req, res) => {
             order: [
                 ["expectDueDate", "ASC"]
             ],
-            where
+            where,
         });
 
         return res.status(200).json({
@@ -480,7 +482,7 @@ export const getWorkRequestReceive = async (req, res) => {
                 }, {
                     workNumber: { [Op.like]: `%${search}%` }
                 }, {
-                    title: { [Op.like]: `%${search}%` }
+                    description: { [Op.like]: `%${search}%` }
                 }, {
                     jigToolNo: { [Op.like]: `%${search}%` }
                 }]
@@ -500,7 +502,7 @@ export const getWorkRequestReceive = async (req, res) => {
                     }, {
                         workNumber: { [Op.like]: `%${search}%` }
                     }, {
-                        title: { [Op.like]: `%${search}%` }
+                        description: { [Op.like]: `%${search}%` }
                     }, {
                         jigToolNo: { [Op.like]: `%${search}%` }
                     }]
@@ -714,7 +716,7 @@ export const getWorkRequests = async (req, res) => {
                 }, {
                     workNumber: { [Op.like]: `%${search}%` }
                 }, {
-                    title: { [Op.like]: `%${search}%` }
+                    description: { [Op.like]: `%${search}%` }
                 }, {
                     jigToolNo: { [Op.like]: `%${search}%` }
                 }]
