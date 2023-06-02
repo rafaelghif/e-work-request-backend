@@ -741,14 +741,14 @@ export const getWorkRequests = async (req, res) => {
         if (year !== "All") {
             where = {
                 ...where,
-                [Op.and]: [connectionDatabase.where(connectionDatabase.fn("YEAR", connectionDatabase.col("Ticket.createdAt")), yearFilter)]
+                [Op.and]: [...(where[Op.and] || []), connectionDatabase.where(connectionDatabase.fn("YEAR", connectionDatabase.col("Ticket.createdAt")), yearFilter)]
             }
         }
 
         if (month !== "All") {
             where = {
                 ...where,
-                [Op.and]: [...where[Op.and], connectionDatabase.where(connectionDatabase.fn("MONTH", connectionDatabase.col("Ticket.createdAt")), monthFilter)]
+                [Op.and]: [...(where[Op.and] || []), connectionDatabase.where(connectionDatabase.fn("MONTH", connectionDatabase.col("Ticket.createdAt")), monthFilter)]
             }
         }
 
