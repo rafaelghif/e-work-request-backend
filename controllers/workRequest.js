@@ -471,7 +471,16 @@ export const getWorkRequestReceive = async (req, res) => {
         let where = {
             [Op.or]: [{ RequesterId: user.id, }, { RequesterLineId: line.id }],
             ticketStatus: "Send to the Requestor",
+            RequesterDepartmentId: department.id,
             inActive: false
+        }
+
+        if (userAccept) {
+            where = {
+                ...where,
+                ticketStatus: "Send to the Requestor",
+                inActive: false
+            }
         }
 
         if (search) {
@@ -486,27 +495,6 @@ export const getWorkRequestReceive = async (req, res) => {
                 }, {
                     jigToolNo: { [Op.like]: `%${search}%` }
                 }]
-            }
-        }
-
-        if (userAccept) {
-            where = {
-                ticketStatus: "Send to the Requestor",
-                inActive: false
-            }
-            if (search) {
-                where = {
-                    ...where,
-                    [Op.or]: [{
-                        ticketNumber: { [Op.like]: `%${search}%` }
-                    }, {
-                        workNumber: { [Op.like]: `%${search}%` }
-                    }, {
-                        description: { [Op.like]: `%${search}%` }
-                    }, {
-                        jigToolNo: { [Op.like]: `%${search}%` }
-                    }]
-                }
             }
         }
 
