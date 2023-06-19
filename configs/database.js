@@ -27,6 +27,12 @@ const connectionDatabase = new Sequelize(connectionOptions.database, connectionO
     port: connectionOptions.port,
     dialect: "mysql",
     timezone: "+07:00",
+    pool: {
+        min: 0,
+        max: 70,
+        acquire: 60000,
+        idle: 20000
+    }
 });
 
 try {
