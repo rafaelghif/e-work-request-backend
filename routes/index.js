@@ -7,6 +7,7 @@ import sectionRouter from "./section.js";
 import userRouter from "./user.js";
 import workRequestRouter from "./workRequest.js";
 import ticketRouter from "./ticket.js";
+import dashboardRouter from "./dashboard.js";
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use("/line", [lineRouter]);
 router.use("/registration-number", [registrationNumberRouter]);
 router.use("/work-request", [workRequestRouter]);
 router.use("/ticket", [ticketRouter]);
+router.use("/dashboard", [dashboardRouter]);
 
 export default router;

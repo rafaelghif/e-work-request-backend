@@ -1,3 +1,4 @@
+import { QueryTypes } from "sequelize";
 import connectionDatabase from "../configs/database.js";
 import Comment from "./comment.js";
 import Department from "./department.js";
@@ -54,6 +55,86 @@ models.TicketOld = TicketOld;
 //         createdBy: "40703191",
 //         updatedBy: "40703191",
 //     });
+
+//     await connectionDatabase.query(`
+//         CREATE OR REPLACE VIEW v_backlog_by_department AS 
+//         SELECT 
+//             d.id AS DepartmentId, 
+//             d.abbreviation, 
+//             ta.status, 
+//             t.expectDueDate 
+//         FROM 
+//             tickets AS t 
+//         JOIN ticketassignees AS ta 
+//         ON 
+//             t.id = ta.TicketId 
+//         JOIN departments AS d 
+//         ON 
+//             ta.AssigneeDepartmentId = d.id 
+//         WHERE 
+//             ta.status IN('Open', 'Pending', 'Progress') 
+//             AND t.expectDueDate <= CURDATE() 
+//         ORDER BY 
+//             t.expectDueDate
+//         ASC;`, {
+//         type: QueryTypes.RAW
+//     });
+
+//     await connectionDatabase.query(`
+//         CREATE OR REPLACE VIEW v_ticket AS
+//         SELECT
+//             t.id AS ticketId,
+//             t.RegistrationNumberId AS registrationNumberId,
+//             r.format AS registrationNumberFormat,
+//             ta.AssigneeDepartmentId AS assigneeDepartmentId,
+//             t.ticketNumber AS ticketNumber,
+//             t.workNumber AS workNumber,
+//             t.description AS description,
+//             t.jigToolNo AS jigToolNo,
+//             t.qty AS qty,
+//             t.expectDueDate AS expectDueDate,
+//             d.name AS requesterDepartment,
+//             t.ticketStatus AS ticketStatus,
+//             ta.status AS assigneeStatus
+//         FROM
+//             tickets as t
+//         JOIN ticketassignees AS ta
+//         ON 
+//             t.id = ta.TicketId
+//         JOIN departments AS d
+//         ON 
+//             t.RequesterDepartmentId = d.id
+//         JOIN registrationnumbers AS r
+//         ON
+//             t.RegistrationNumberId = r.id
+//         ORDER BY
+//             expectDueDate ASC;`, {
+//         type: QueryTypes.RAW
+//     });
+
+//     await connectionDatabase.query(`
+//         CREATE OR REPLACE VIEW v_backlog_by_registration_number AS
+//         SELECT
+//             r.id AS registrationNumberId,
+//             r.format AS registrationNumberFormat,
+//             ta.status,
+//             t.expectDueDate
+//         FROM
+//             tickets AS t
+//         JOIN ticketassignees AS ta
+//         ON
+//             t.id = ta.TicketId
+//         JOIN registrationnumbers AS r
+//         ON
+//             t.RegistrationNumberId = r.id
+//         WHERE
+//             ta.status IN('Open', 'Pending', 'Progress') AND t.expectDueDate <= CURDATE()
+//         ORDER BY
+//             t.expectDueDate
+//         ASC;`, {
+//         type: QueryTypes.RAW
+//     });
+
 // });
 
 connectionDatabase.sync();

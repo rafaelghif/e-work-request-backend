@@ -7,7 +7,7 @@ export const createWorkRequestRule = [
     body("expectDueDate").notEmpty().withMessage("Expect Due Date Cannot Be Null!"),
     body("RequesterDepartmentId").notEmpty().withMessage("RequesterDepartmentId Cannot Be Null!")
         .isUUID("4").withMessage("Invalid RequesterDepartmentId"),
-    body("AssigneeDepartmentIds").notEmpty().withMessage("RequesterDepartmentId Cannot Be Null!")
+    body("AssigneeDepartmentIds").notEmpty().withMessage("AssigneeDepartmentId Cannot Be Null!")
         .isArray().withMessage("Invalid AssigneeDepartmentIds"),
     body("RegistrationNumberId").notEmpty().withMessage("RegistrationNumberId Cannot Be Null!")
         .isUUID("4").withMessage("Invalid RegistrationNumberId"),
