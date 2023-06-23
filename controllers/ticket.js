@@ -65,9 +65,12 @@ export const getTickets = async (req, res) => {
         }
 
         if (month !== "All") {
+            const condition = year !== "All" ? {
+                [Op.and]: [...where[Op.and], connectionDatabase.where(connectionDatabase.fn("MONTH", connectionDatabase.col("TicketOld.receivedDate")), monthFilter)]
+            } : { [Op.and]: [connectionDatabase.where(connectionDatabase.fn("MONTH", connectionDatabase.col("TicketOld.receivedDate")), monthFilter)] }
             where = {
                 ...where,
-                [Op.and]: [...where[Op.and], connectionDatabase.where(connectionDatabase.fn("MONTH", connectionDatabase.col("TicketOld.receivedDate")), monthFilter)]
+                ...condition
             }
         }
 
