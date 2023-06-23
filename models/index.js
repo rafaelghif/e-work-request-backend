@@ -73,7 +73,7 @@ models.TicketOld = TicketOld;
 //             ta.AssigneeDepartmentId = d.id 
 //         WHERE 
 //             ta.status IN('Open', 'Pending', 'Progress') 
-//             AND t.expectDueDate <= CURDATE() 
+//             AND t.expectDueDate <= CURDATE() AND t.ticketStatus NOT IN('Reject','Complete','Waiting Approve')
 //         ORDER BY 
 //             t.expectDueDate
 //         ASC;`, {
@@ -107,6 +107,8 @@ models.TicketOld = TicketOld;
 //         JOIN registrationnumbers AS r
 //         ON
 //             t.RegistrationNumberId = r.id
+//         WHERE
+//             t.ticketStatus NOT IN('Reject','Complete','Waiting Approve')
 //         ORDER BY
 //             expectDueDate ASC;`, {
 //         type: QueryTypes.RAW
@@ -128,7 +130,7 @@ models.TicketOld = TicketOld;
 //         ON
 //             t.RegistrationNumberId = r.id
 //         WHERE
-//             ta.status IN('Open', 'Pending', 'Progress') AND t.expectDueDate <= CURDATE()
+//             ta.status IN('Open', 'Pending', 'Progress') AND t.expectDueDate <= CURDATE() AND t.ticketStatus NOT IN('Reject','Complete','Waiting Approve')
 //         ORDER BY
 //             t.expectDueDate
 //         ASC;`, {
