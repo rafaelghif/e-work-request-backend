@@ -16,7 +16,6 @@ export const formatDate = (stringDate, cols, ticketType) => {
         return fns.format(Date.parse(stringDate), "yyyy-MM-dd", { timeZone: "Asia/Jakarta" });
     } catch (err) {
         let datas = `${ticketType},${cols['__EMPTY_2']}\n`;
-        console.log(cols);
         fs.appendFile("D:/40703191/Programming/NodeJS/Personal/e-work-request/e-work-request-backend/logs/errors/2023/05/error-data.csv", datas, (err) => {
             if (err) {
                 console.log(err);
@@ -113,12 +112,15 @@ export const updateTicket = async (req, res) => {
         const { id, ticketNo, location, description, remark, receivedDate, completedDate } = req.body;
         const { badgeId } = req.decoded.user;
 
+        const ticketStatus = receivedDate !== null && completedDate !== null ? "COMPLETE" : "OPEN";
+
         await models.TicketOld.update({
             location,
             description,
             remark,
             receivedDate,
             completedDate,
+            ticketStatus,
             updatedBy: badgeId
         }, {
             where: { id }
@@ -142,7 +144,7 @@ export const updateTicket = async (req, res) => {
 
 export const importTicket = async (req, res) => {
     try {
-        const directoryPath = "D:/40703191/Programming/NodeJS/Personal/e-work-request/e-work-request-backend/public/ticket/old";
+        const directoryPath = "D:/40703191/Programming/NodeJS/Personal/Ionic/e-work-request/e-work-request-backend/public/ticket/old";
 
         XLSX.set_fs(fs);
 
@@ -185,7 +187,6 @@ export const importTicket = async (req, res) => {
             sheets.map(async (sheet) => {
                 const rows = XLSX.utils.sheet_to_json(file.Sheets[sheet]);
                 for (const cols of rows) {
-                    console.log({ cols });
                     if (cols["Description Of Problem"]) {
                         if (cols["Description Of Problem"] === "") {
                             break;
@@ -239,6 +240,8 @@ export const importTicket = async (req, res) => {
                         const completedDate = cols["__EMPTY_4"] ? formatDate(cols["__EMPTY_4"], cols, ticketType) : null;
                         const remark = cols["__EMPTY_5"] ? cols["__EMPTY_5"].toString().trim() : null;
 
+                        const ticketStatus = receivedDate !== null && completedDate !== null ? "COMPLETE" : "OPEN";
+
                         await models.TicketOld.create({
                             woNo,
                             ticketNo: workOrderNo,
@@ -248,6 +251,7 @@ export const importTicket = async (req, res) => {
                             receivedDate,
                             completedDate,
                             ticketType,
+                            ticketStatus,
                             createdBy: "SYSTEM",
                             updatedBy: "SYSTEM"
                         }, { logging: false });

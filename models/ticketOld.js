@@ -45,6 +45,10 @@ const TicketOld = connectionDatabase.define("TicketOld", {
         type: DataTypes.STRING(15),
         allowNull: false
     },
+    ticketStatus: {
+        type: DataTypes.ENUM("OPEN", "COMPLETE"),
+        defaultValue: "OPEN",
+    },
     createdBy: {
         type: DataTypes.STRING(8),
         allowNull: false,

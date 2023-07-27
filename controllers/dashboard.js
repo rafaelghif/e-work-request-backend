@@ -20,41 +20,43 @@ export const getChartBackLogs = async (req, res) => {
 
         const { month, year } = req.params;
 
+        let groupByArr = [];
+        let groupBy = "";
+
         const whereArr = [];
         let where = "";
 
         if (month !== "All") {
             whereArr.push(`MONTH(expectDueDate) = '${month}'`);
+            groupByArr.push("MONTH(expectDueDate)");
         }
 
         if (year !== "All") {
             whereArr.push(`YEAR(expectDueDate) = '${year}'`);
+            groupByArr.push("YEAR(expectDueDate)");
         }
 
         if (whereArr.length > 0) {
             where = `WHERE ${whereArr.join(" AND ")}`;
         }
 
-        const response = await connectionDatabase.query(`
-        SELECT
-            registrationNumberId,
-            registrationNumberFormat,
-            YEAR(expectDueDate) AS expectYear,
-            MONTH(expectDueDate) AS expectMonth,
-            COUNT(*) AS total
-        FROM
-            v_backlog_by_registration_number
-            ${where}
-        GROUP BY
-            registrationNumberId,
-            registrationNumberFormat,
-            YEAR(expectDueDate),
-            MONTH(expectDueDate)
-        ORDER BY
-            YEAR(expectDueDate),
-            MONTH(expectDueDate) 
-        ASC;
-        `, { type: QueryTypes.SELECT });
+        groupBy = groupByArr.join(",");
+
+        const query = `
+            SELECT
+                registrationNumberId,
+                registrationNumberFormat,
+                COUNT(*) AS total
+            FROM
+                v_backlog_by_registration_number
+                ${where}
+            GROUP BY
+                registrationNumberId,
+                registrationNumberFormat,
+                ${groupBy};
+        `;
+
+        const response = await connectionDatabase.query(query, { type: QueryTypes.SELECT });
 
         const data = response.map((res) => ({
             registrationNumberId: res.registrationNumberId,
@@ -96,7 +98,7 @@ export const getBacklogs = async (req, res) => {
         const { month, year, registrationNumberId } = req.params;
         const whereArr = [];
 
-        let where = `WHERE registrationNumberId = '${registrationNumberId}' AND assigneeStatus IN ('Open','Pending','Progress') AND expectDueDate <= CURDATE()`;
+        let where = `WHERE registrationNumberId = '${registrationNumberId}' AND expectDueDate <= CURDATE()`;
 
         if (month !== "All") {
             whereArr.push(`MONTH(expectDueDate) = '${month}'`);
@@ -147,24 +149,29 @@ export const getChartOutstanding = async (req, res) => {
         const whereArr = [];
         let where = "";
 
+        let groupByArr = [];
+        let groupBy = "";
+
         if (month !== "All") {
             whereArr.push(`MONTH(expectDueDate) = '${month}'`);
+            groupByArr.push("MONTH(expectDueDate)");
         }
 
         if (year !== "All") {
             whereArr.push(`YEAR(expectDueDate) = '${year}'`);
+            groupByArr.push("YEAR(expectDueDate)");
         }
 
         if (whereArr.length > 0) {
             where = `WHERE ${whereArr.join(" AND ")}`;
         }
 
-        const response = await connectionDatabase.query(`
+        groupBy = groupByArr.join(",");
+
+        const query = `
         SELECT
             registrationNumberId,
             registrationNumberFormat,
-            YEAR(expectDueDate) AS expectYear,
-            MONTH(expectDueDate) AS expectMonth,
             COUNT(*) AS total
         FROM
             v_outstanding_by_registration_number
@@ -172,13 +179,10 @@ export const getChartOutstanding = async (req, res) => {
         GROUP BY
             registrationNumberId,
             registrationNumberFormat,
-            YEAR(expectDueDate),
-            MONTH(expectDueDate)
-        ORDER BY
-            YEAR(expectDueDate),
-            MONTH(expectDueDate) 
-        ASC;
-        `, { type: QueryTypes.SELECT });
+            ${groupBy};
+        `;
+
+        const response = await connectionDatabase.query(query, { type: QueryTypes.SELECT });
 
         const data = response.map((res) => ({
             registrationNumberId: res.registrationNumberId,
@@ -220,7 +224,7 @@ export const getOutstanding = async (req, res) => {
         const { month, year, registrationNumberId } = req.params;
         const whereArr = [];
 
-        let where = `WHERE registrationNumberId = '${registrationNumberId}' AND assigneeStatus IN ('Open','Pending','Progress')`;
+        let where = `WHERE registrationNumberId = '${registrationNumberId}'`;
 
         if (month !== "All") {
             whereArr.push(`MONTH(expectDueDate) = '${month}'`);
@@ -333,7 +337,7 @@ export const getDueDates = async (req, res) => {
         let where = `WHERE expectDueDate = '${dueDate}'`;
 
         const response = await connectionDatabase.query(`SELECT* FROM v_ticket ${where} ;`, { type: QueryTypes.SELECT });
-        
+
         return res.status(200).json({
             message: "Success Fetch Data Ticket Due Date!",
             data: response

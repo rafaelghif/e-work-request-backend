@@ -471,13 +471,12 @@ export const getWorkRequestReceive = async (req, res) => {
         let where = {
             [Op.or]: [{ RequesterId: user.id, }, { RequesterLineId: line.id }],
             ticketStatus: "Send to the Requestor",
-            RequesterDepartmentId: department.id,
             inActive: false
         }
 
         if (userAccept) {
             where = {
-                ...where,
+                RequesterDepartmentId: department.id,
                 ticketStatus: "Send to the Requestor",
                 inActive: false
             }
