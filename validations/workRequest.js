@@ -53,3 +53,11 @@ export const updateWorkRequestRule = [
     body("qty").notEmpty().withMessage("Qty Cannot Be Null!").toInt(),
     body("expectDueDate").notEmpty().withMessage("Expect Due Date Cannot Be Null!"),
 ];
+
+export const sendBackToAssigneeRule = [
+    body("ticketId").notEmpty().withMessage("TicketId Cannot Be Null!")
+        .isUUID("4").withMessage("Invalid TicketId"),
+    body("remark").notEmpty().withMessage("Remark Cannot Be Null!"),
+    body("ticketAssigneeIds").notEmpty().withMessage("TicketAssigneeIds Cannot Be Null!")
+        .isArray().withMessage("Invalid TicketAssigneeIds"),
+];

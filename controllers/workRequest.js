@@ -32,7 +32,8 @@ export const getTicketNumber = async (req, res) => {
     try {
         const { search } = req.query;
         let where = {
-            inActive: false
+            inActive: false,
+            ticketStatus: { [Op.in]: ["Waiting Approve", "Approve", "Progress", "Send to the Requestor", ""] }
         }
 
         if (search) {
@@ -1405,6 +1406,71 @@ export const updateWorkRequest = async (req, res) => {
                 id: id
             }, transaction
         })
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            message: commentText,
+            data: null
+        });
+    } catch (err) {
+        transaction.rollback();
+        errorLogging(err.toString());
+        return res.status(400).json({
+            isExpressValidation: false,
+            data: {
+                title: "Something Wrong!",
+                message: err.toString()
+            }
+        });
+    }
+}
+
+export const sendBackToAssignee = async (req, res) => {
+    const transaction = await connectionDatabase.transaction();
+    try {
+        // Express Validator 
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                isExpressValidation: true,
+                data: {
+                    title: "Validation Errors!",
+                    message: "Validation Error!",
+                    validationError: errors.array()
+                }
+            });
+        }
+
+        const { ticketId, ticketAssigneeIds, remark } = req.body;
+        const { id: UserId, badgeId, name } = req.decoded.user;
+
+        let commentTitle = "Send Back To Assignee";
+        let commentText = `This ticket was send back to assignee by ${badgeId} - ${name}. ${remark}`;
+
+        for (const ticketAssigneeId of ticketAssigneeIds) {
+            console.log({ ticketAssigneeId });
+            await models.TicketAssignee.update({
+                status: "Progress",
+                updatedBy: badgeId
+            }, {
+                where: { id: ticketAssigneeId },
+                transaction
+            });
+        }
+
+        await models.Ticket.update({
+            ticketStatus: "Progress"
+        }, { where: { id: ticketId }, transaction });
+
+        await models.Comment.create({
+            title: commentTitle,
+            text: commentText,
+            TicketId: ticketId,
+            UserId: UserId,
+            createdBy: badgeId,
+            updatedBy: badgeId
+        }, { transaction });
 
         await transaction.commit();
 

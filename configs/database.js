@@ -22,6 +22,8 @@ const productionOptions = {
 
 const connectionOptions = environment === "Production" ? productionOptions : developmentOptions;
 
+// console.log(connectionOptions);
+
 const connectionDatabase = new Sequelize(connectionOptions.database, connectionOptions.username, connectionOptions.password, {
     host: connectionOptions.host,
     port: connectionOptions.port,

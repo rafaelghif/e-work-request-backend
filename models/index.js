@@ -1,4 +1,3 @@
-import { QueryTypes } from "sequelize";
 import connectionDatabase from "../configs/database.js";
 import Comment from "./comment.js";
 import Department from "./department.js";
@@ -9,6 +8,9 @@ import Ticket from "./ticket.js";
 import TicketAssignee from "./ticketAssignee.js";
 import TicketOld from "./ticketOld.js";
 import User from "./user.js";
+import LedgerJig from "./LedgerJig.js";
+import LedgerJigDetail from "./ledgerJigDetail.js";
+import LedgerJigDetailHistory from "./ledgerJigDetailHistory.js";
 
 const models = {}
 
@@ -21,118 +23,121 @@ models.Ticket = Ticket;
 models.TicketAssignee = TicketAssignee;
 models.Comment = Comment;
 models.TicketOld = TicketOld;
+models.LedgerJig = LedgerJig;
+models.LedgerJigDetail = LedgerJigDetail;
+models.LedgerJigDetailHistory = LedgerJigDetailHistory;
 
 // connectionDatabase.sync({ force: true }).then(async () => {
-    // const responseDepartment = await models.Department.create({
-    //     name: "Process Engineer Department",
-    //     abbreviation: "PED",
-    //     createdBy: "40703191",
-    //     updatedBy: "40703191"
-    // });
+// const responseDepartment = await models.Department.create({
+//     name: "Process Engineer Department",
+//     abbreviation: "PED",
+//     createdBy: "40703191",
+//     updatedBy: "40703191"
+// });
 
-    // const responseSection = await models.Section.bulkCreate([{
-    //     name: "Division Head",
-    //     level: 0,
-    //     createdBy: "40703191",
-    //     updatedBy: "40703191",
-    //     DepartmentId: responseDepartment.id
-    // }, {
-    //     name: "IT Programmer",
-    //     level: 0,
-    //     createdBy: "40703191",
-    //     updatedBy: "40703191",
-    //     DepartmentId: responseDepartment.id
-    // }]);
+// const responseSection = await models.Section.bulkCreate([{
+//     name: "Division Head",
+//     level: 0,
+//     createdBy: "40703191",
+//     updatedBy: "40703191",
+//     DepartmentId: responseDepartment.id
+// }, {
+//     name: "IT Programmer",
+//     level: 0,
+//     createdBy: "40703191",
+//     updatedBy: "40703191",
+//     DepartmentId: responseDepartment.id
+// }]);
 
-    // await models.User.create({
-    //     badgeId: "40703191",
-    //     password: "abcd1234;",
-    //     name: "Muhammad Rafael Ghifari",
-    //     email: "Muhammad.Rafael@yokogawa.com",
-    //     role: "SUPER USER",
-    //     DepartmentId: responseDepartment.id,
-    //     SectionId: responseSection[1].id,
-    //     createdBy: "40703191",
-    //     updatedBy: "40703191",
-    // });
+// await models.User.create({
+//     badgeId: "40703191",
+//     password: "abcd1234;",
+//     name: "Muhammad Rafael Ghifari",
+//     email: "Muhammad.Rafael@yokogawa.com",
+//     role: "SUPER USER",
+//     DepartmentId: responseDepartment.id,
+//     SectionId: responseSection[1].id,
+//     createdBy: "40703191",
+//     updatedBy: "40703191",
+// });
 
-    // await connectionDatabase.query(`
-    //     CREATE OR REPLACE VIEW v_ticket AS
-    //     SELECT
-    //         t.id AS ticketId,
-    //         t.RegistrationNumberId AS registrationNumberId,
-    //         r.format AS registrationNumberFormat,
-    //         ta.AssigneeDepartmentId AS assigneeDepartmentId,
-    //         t.ticketNumber AS ticketNumber,
-    //         t.workNumber AS workNumber,
-    //         t.description AS description,
-    //         t.jigToolNo AS jigToolNo,
-    //         t.qty AS qty,
-    //         t.expectDueDate AS expectDueDate,
-    //         d.name AS requesterDepartment,
-    //         t.ticketStatus AS ticketStatus,
-    //         ta.status AS assigneeStatus
-    //     FROM
-    //         tickets as t
-    //     JOIN ticketassignees AS ta
-    //     ON 
-    //         t.id = ta.TicketId
-    //     JOIN departments AS d
-    //     ON 
-    //         t.RequesterDepartmentId = d.id
-    //     JOIN registrationnumbers AS r
-    //     ON
-    //         t.RegistrationNumberId = r.id
-    //     WHERE
-    //         t.ticketStatus NOT IN('Reject','Complete')
-    //     ORDER BY
-    //         expectDueDate ASC;`, {
-    //     type: QueryTypes.RAW
-    // });
+// await connectionDatabase.query(`
+//     CREATE OR REPLACE VIEW v_ticket AS
+//     SELECT
+//         t.id AS ticketId,
+//         t.RegistrationNumberId AS registrationNumberId,
+//         r.format AS registrationNumberFormat,
+//         ta.AssigneeDepartmentId AS assigneeDepartmentId,
+//         t.ticketNumber AS ticketNumber,
+//         t.workNumber AS workNumber,
+//         t.description AS description,
+//         t.jigToolNo AS jigToolNo,
+//         t.qty AS qty,
+//         t.expectDueDate AS expectDueDate,
+//         d.name AS requesterDepartment,
+//         t.ticketStatus AS ticketStatus,
+//         ta.status AS assigneeStatus
+//     FROM
+//         tickets as t
+//     JOIN ticketassignees AS ta
+//     ON 
+//         t.id = ta.TicketId
+//     JOIN departments AS d
+//     ON 
+//         t.RequesterDepartmentId = d.id
+//     JOIN registrationnumbers AS r
+//     ON
+//         t.RegistrationNumberId = r.id
+//     WHERE
+//         t.ticketStatus NOT IN('Reject','Complete')
+//     ORDER BY
+//         expectDueDate ASC;`, {
+//     type: QueryTypes.RAW
+// });
 
-    // await connectionDatabase.query(`
-    //     CREATE OR REPLACE VIEW v_backlog_by_registration_number AS
-    //     SELECT
-    //         r.id AS registrationNumberId,
-    //         r.format AS registrationNumberFormat,
-    //         ta.status,
-    //         t.expectDueDate
-    //     FROM
-    //         tickets AS t
-    //     JOIN ticketassignees AS ta
-    //     ON
-    //         t.id = ta.TicketId
-    //     JOIN registrationnumbers AS r
-    //     ON
-    //         t.RegistrationNumberId = r.id
-    //     WHERE
-    //         t.expectDueDate <= CURDATE() AND t.ticketStatus NOT IN('Reject','Complete','Waiting Approve')
-    //     ORDER BY
-    //         t.expectDueDate
-    //     ASC;`, {
-    //     type: QueryTypes.RAW
-    // });
+// await connectionDatabase.query(`
+//     CREATE OR REPLACE VIEW v_backlog_by_registration_number AS
+//     SELECT
+//         r.id AS registrationNumberId,
+//         r.format AS registrationNumberFormat,
+//         ta.status,
+//         t.expectDueDate
+//     FROM
+//         tickets AS t
+//     JOIN ticketassignees AS ta
+//     ON
+//         t.id = ta.TicketId
+//     JOIN registrationnumbers AS r
+//     ON
+//         t.RegistrationNumberId = r.id
+//     WHERE
+//         t.expectDueDate <= CURDATE() AND t.ticketStatus NOT IN('Reject','Complete','Waiting Approve')
+//     ORDER BY
+//         t.expectDueDate
+//     ASC;`, {
+//     type: QueryTypes.RAW
+// });
 
-    // await connectionDatabase.query(`
-    //     CREATE OR REPLACE VIEW v_outstanding_by_registration_number AS
-    //     SELECT 
-    //         r.id AS registrationNumberId,
-    //         r.format AS registrationNumberFormat,
-    //         ta.status AS status,
-    //         t.expectDueDate AS expectDueDate 
-    //     FROM 
-    //         ymb_e_work_request.tickets t 
-    //     JOIN 
-    //         ymb_e_work_request.ticketassignees ta on t.id = ta.TicketId
-    //     JOIN 
-    //         ymb_e_work_request.registrationnumbers r on t.RegistrationNumberId = r.id
-    //     WHERE 
-    //         t.ticketStatus not in ('Reject','Complete','Waiting Approve')
-    //     ORDER BY 
-    //         t.expectDueDate
-    //     ASC;`, {
-    //     type: QueryTypes.RAW
-    // });
+// await connectionDatabase.query(`
+//     CREATE OR REPLACE VIEW v_outstanding_by_registration_number AS
+//     SELECT 
+//         r.id AS registrationNumberId,
+//         r.format AS registrationNumberFormat,
+//         ta.status AS status,
+//         t.expectDueDate AS expectDueDate 
+//     FROM 
+//         ymb_e_work_request.tickets t 
+//     JOIN 
+//         ymb_e_work_request.ticketassignees ta on t.id = ta.TicketId
+//     JOIN 
+//         ymb_e_work_request.registrationnumbers r on t.RegistrationNumberId = r.id
+//     WHERE 
+//         t.ticketStatus not in ('Reject','Complete','Waiting Approve')
+//     ORDER BY 
+//         t.expectDueDate
+//     ASC;`, {
+//     type: QueryTypes.RAW
+// });
 
 // });
 
@@ -192,5 +197,11 @@ models.TicketAssignee.belongsTo(models.Department, { as: "AssigneeDepartment", f
 
 models.Line.hasMany(models.Ticket, { as: "RequesterLine", foreignKey: "RequesterLineId" });
 models.Ticket.belongsTo(models.Line, { as: "RequesterLine", foreignKey: "RequesterLineId" });
+
+models.LedgerJig.hasOne(models.LedgerJigDetail, { onDelete: "CASCADE", onUpdate: "CASCADE" });
+models.LedgerJigDetail.belongsTo(models.LedgerJig, { onDelete: "CASCADE", onUpdate: "CASCADE" });
+
+models.LedgerJigDetail.hasMany(models.LedgerJigDetailHistory, { onDelete: "CASCADE", onUpdate: "CASCADE" });
+models.LedgerJigDetailHistory.belongsTo(models.LedgerJigDetail, { onDelete: "CASCADE", onUpdate: "CASCADE" });
 
 export default models;

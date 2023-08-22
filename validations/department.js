@@ -16,3 +16,8 @@ export const inActiveDepartmentRule = [
     param("departmentId").notEmpty().withMessage("DepartmentId Cannot Be Null!")
         .isUUID("4").withMessage("Invalid Department Id")
 ];
+
+export const getTicketAssigneeDepartmentRule = [
+    param("ticketId").notEmpty().withMessage("DepartmentId Cannot Be Null!")
+        .isUUID("4").withMessage("Invalid Department Id")
+];

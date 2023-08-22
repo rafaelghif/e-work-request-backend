@@ -8,6 +8,7 @@ import userRouter from "./user.js";
 import workRequestRouter from "./workRequest.js";
 import ticketRouter from "./ticket.js";
 import dashboardRouter from "./dashboard.js";
+import ledgerJigRouter from "./ledger-jig.js";
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use("/registration-number", [registrationNumberRouter]);
 router.use("/work-request", [workRequestRouter]);
 router.use("/ticket", [ticketRouter]);
 router.use("/dashboard", [dashboardRouter]);
+router.use("/ledger-jig", [ledgerJigRouter]);
 
 export default router;

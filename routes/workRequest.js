@@ -1,8 +1,8 @@
 import { Router } from "express";
 import multer from "multer";
-import { assignTicket, createWorkRequest, getTicketNumber, getTicketRequest, getTicketRequestCount, getWorkRequest, getWorkRequestComment, getWorkRequestCount, getWorkRequestDepartment, getWorkRequestMonth, getWorkRequestReceive, getWorkRequestReceiveCount, getWorkRequests, getWorkRequestType, getWorkRequestYear, headActionTicket, picActionTicket, receiveTicket, updateWorkRequest } from "../controllers/workRequest.js";
+import { assignTicket, createWorkRequest, getTicketNumber, getTicketRequest, getTicketRequestCount, getWorkRequest, getWorkRequestComment, getWorkRequestCount, getWorkRequestDepartment, getWorkRequestMonth, getWorkRequestReceive, getWorkRequestReceiveCount, getWorkRequests, getWorkRequestType, getWorkRequestYear, headActionTicket, picActionTicket, receiveTicket, sendBackToAssignee, updateWorkRequest } from "../controllers/workRequest.js";
 import { authVerify } from "../middlewares/auth.js";
-import { assignTicketRule, createWorkRequestRule, updateWorkRequestRule, getWorkRequestCommentRule, headActionTicketRule, picActionTicketRule, receiveTicketRule } from "../validations/workRequest.js";
+import { assignTicketRule, createWorkRequestRule, updateWorkRequestRule, getWorkRequestCommentRule, headActionTicketRule, picActionTicketRule, receiveTicketRule, sendBackToAssigneeRule } from "../validations/workRequest.js";
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -45,5 +45,6 @@ workRequestRouter.patch("/head-action", [authVerify, headActionTicketRule, headA
 workRequestRouter.patch("/assign", [authVerify, assignTicketRule, assignTicket]);
 workRequestRouter.patch("/pic-action", [authVerify, picActionTicketRule, picActionTicket]);
 workRequestRouter.patch("/receive", [authVerify, receiveTicketRule, receiveTicket]);
+workRequestRouter.patch("/sendBack", [authVerify, sendBackToAssigneeRule, sendBackToAssignee]);
 
 export default workRequestRouter;

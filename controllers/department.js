@@ -192,3 +192,47 @@ export const inActiveDepartment = async (req, res) => {
         });
     }
 }
+
+export const getTicketAssigneeDepartment = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                isExpressValidation: true,
+                data: {
+                    title: "Validation Errors!",
+                    message: "Validation Error!",
+                    validationError: errors.array()
+                }
+            });
+        }
+
+        const { ticketId } = req.params;
+
+        const response = await models.TicketAssignee.findAll({
+            attributes: ["id"],
+            where: {
+                TicketId: ticketId,
+            },
+            include: [{
+                model: models.Department,
+                attributes: ["id", "name","abbreviation"],
+                as: "AssigneeDepartment"
+            }]
+        });
+
+        return res.status(200).json({
+            message: "Success Fetch Ticket Assignee Department!",
+            data: response
+        });
+    } catch (err) {
+        errorLogging(err.toString());
+        return res.status(400).json({
+            isExpressValidation: false,
+            data: {
+                title: "Something Wrong!",
+                message: err.toString()
+            }
+        });
+    }
+}
