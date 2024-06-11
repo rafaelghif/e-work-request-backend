@@ -1,0 +1,14 @@
+{
+	"bracketSameLine": true,
+	"bracketSpacing": true,
+	"endOfLine": "lf",
+	"semi": true,
+	"tabWidth": 4,
+	"useTabs": true,
+	"singleQuote": false,
+	"singleAttributePerLine": true,
+	"plugins": ["@trivago/prettier-plugin-sort-imports"],
+	"importOrder": ["^dotenv/(.*)$", "<THIRD_PARTY_MODULES>", "^[./]"],
+	"importOrderSeparation": true,
+	"importOrderSortSpecifiers": true
+}

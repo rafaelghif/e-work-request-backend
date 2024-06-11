@@ -1,6 +1,9 @@
 import connectionDatabase from "../configs/database.js";
+import LedgerJig from "./LedgerJig.js";
 import Comment from "./comment.js";
 import Department from "./department.js";
+import LedgerJigDetail from "./ledgerJigDetail.js";
+import LedgerJigDetailHistory from "./ledgerJigDetailHistory.js";
 import Line from "./line.js";
 import RegistrationNumber from "./registrationNumber.js";
 import Section from "./section.js";
@@ -8,11 +11,8 @@ import Ticket from "./ticket.js";
 import TicketAssignee from "./ticketAssignee.js";
 import TicketOld from "./ticketOld.js";
 import User from "./user.js";
-import LedgerJig from "./LedgerJig.js";
-import LedgerJigDetail from "./ledgerJigDetail.js";
-import LedgerJigDetailHistory from "./ledgerJigDetailHistory.js";
 
-const models = {}
+const models = {};
 
 models.Department = Department;
 models.Section = Section;
@@ -80,10 +80,10 @@ models.LedgerJigDetailHistory = LedgerJigDetailHistory;
 //     FROM
 //         tickets as t
 //     JOIN ticketassignees AS ta
-//     ON 
+//     ON
 //         t.id = ta.TicketId
 //     JOIN departments AS d
-//     ON 
+//     ON
 //         t.RequesterDepartmentId = d.id
 //     JOIN registrationnumbers AS r
 //     ON
@@ -120,20 +120,20 @@ models.LedgerJigDetailHistory = LedgerJigDetailHistory;
 
 // await connectionDatabase.query(`
 //     CREATE OR REPLACE VIEW v_outstanding_by_registration_number AS
-//     SELECT 
+//     SELECT
 //         r.id AS registrationNumberId,
 //         r.format AS registrationNumberFormat,
 //         ta.status AS status,
-//         t.expectDueDate AS expectDueDate 
-//     FROM 
-//         ymb_e_work_request.tickets t 
-//     JOIN 
+//         t.expectDueDate AS expectDueDate
+//     FROM
+//         ymb_e_work_request.tickets t
+//     JOIN
 //         ymb_e_work_request.ticketassignees ta on t.id = ta.TicketId
-//     JOIN 
+//     JOIN
 //         ymb_e_work_request.registrationnumbers r on t.RegistrationNumberId = r.id
-//     WHERE 
+//     WHERE
 //         t.ticketStatus not in ('Reject','Complete','Waiting Approve')
-//     ORDER BY 
+//     ORDER BY
 //         t.expectDueDate
 //     ASC;`, {
 //     type: QueryTypes.RAW
@@ -164,10 +164,22 @@ models.Line.belongsTo(models.Department);
 models.RegistrationNumber.hasMany(models.Ticket);
 models.Ticket.belongsTo(models.RegistrationNumber);
 
-models.User.hasMany(models.Ticket, { as: "Requester", foreignKey: "RequesterId" });
-models.User.hasMany(models.Ticket, { as: "Receiver", foreignKey: "ReceiverId" });
-models.Ticket.belongsTo(models.User, { as: "Requester", foreignKey: "RequesterId" });
-models.Ticket.belongsTo(models.User, { as: "Receiver", foreignKey: "ReceiverId" });
+models.User.hasMany(models.Ticket, {
+	as: "Requester",
+	foreignKey: "RequesterId",
+});
+models.User.hasMany(models.Ticket, {
+	as: "Receiver",
+	foreignKey: "ReceiverId",
+});
+models.Ticket.belongsTo(models.User, {
+	as: "Requester",
+	foreignKey: "RequesterId",
+});
+models.Ticket.belongsTo(models.User, {
+	as: "Receiver",
+	foreignKey: "ReceiverId",
+});
 
 models.Ticket.hasMany(models.Comment);
 models.Comment.belongsTo(models.Ticket);
@@ -175,33 +187,93 @@ models.Comment.belongsTo(models.Ticket);
 models.User.hasMany(models.Comment);
 models.Comment.belongsTo(models.User);
 
-models.Department.hasMany(models.Ticket, { as: "RequesterDepartment", foreignKey: "RequesterDepartmentId" });
-models.Department.hasMany(models.Ticket, { as: "ReceiverDepartment", foreignKey: "ReceiverDepartmentId" });
-models.Ticket.belongsTo(models.Department, { as: "RequesterDepartment", foreignKey: "RequesterDepartmentId" });
-models.Ticket.belongsTo(models.Department, { as: "ReceiverDepartment", foreignKey: "ReceiverDepartmentId" });
+models.Department.hasMany(models.Ticket, {
+	as: "RequesterDepartment",
+	foreignKey: "RequesterDepartmentId",
+});
+models.Department.hasMany(models.Ticket, {
+	as: "ReceiverDepartment",
+	foreignKey: "ReceiverDepartmentId",
+});
+models.Ticket.belongsTo(models.Department, {
+	as: "RequesterDepartment",
+	foreignKey: "RequesterDepartmentId",
+});
+models.Ticket.belongsTo(models.Department, {
+	as: "ReceiverDepartment",
+	foreignKey: "ReceiverDepartmentId",
+});
 
 models.Ticket.hasMany(models.TicketAssignee);
 models.TicketAssignee.belongsTo(models.Ticket);
 
-models.User.hasMany(models.TicketAssignee, { as: "Approver", foreignKey: "ApproverId" });
-models.User.hasMany(models.TicketAssignee, { as: "Assignee", foreignKey: "AssigneeId" });
-models.User.hasMany(models.TicketAssignee, { as: "PersonInCharge", foreignKey: "PersonInChargeId" });
-models.TicketAssignee.belongsTo(models.User, { as: "Approver", foreignKey: "ApproverId" });
-models.TicketAssignee.belongsTo(models.User, { as: "Assignee", foreignKey: "AssigneeId" });
-models.TicketAssignee.belongsTo(models.User, { as: "PersonInCharge", foreignKey: "PersonInChargeId" });
+models.User.hasMany(models.TicketAssignee, {
+	as: "Approver",
+	foreignKey: "ApproverId",
+});
+models.User.hasMany(models.TicketAssignee, {
+	as: "Assignee",
+	foreignKey: "AssigneeId",
+});
+models.User.hasMany(models.TicketAssignee, {
+	as: "PersonInCharge",
+	foreignKey: "PersonInChargeId",
+});
+models.TicketAssignee.belongsTo(models.User, {
+	as: "Approver",
+	foreignKey: "ApproverId",
+});
+models.TicketAssignee.belongsTo(models.User, {
+	as: "Assignee",
+	foreignKey: "AssigneeId",
+});
+models.TicketAssignee.belongsTo(models.User, {
+	as: "PersonInCharge",
+	foreignKey: "PersonInChargeId",
+});
 
-models.Department.hasMany(models.TicketAssignee, { as: "ApproverDepartment", foreignKey: "ApproverDepartmentId" });
-models.Department.hasMany(models.TicketAssignee, { as: "AssigneeDepartment", foreignKey: "AssigneeDepartmentId" });
-models.TicketAssignee.belongsTo(models.Department, { as: "ApproverDepartment", foreignKey: "ApproverDepartmentId" });
-models.TicketAssignee.belongsTo(models.Department, { as: "AssigneeDepartment", foreignKey: "AssigneeDepartmentId" });
+models.Department.hasMany(models.TicketAssignee, {
+	as: "ApproverDepartment",
+	foreignKey: "ApproverDepartmentId",
+});
+models.Department.hasMany(models.TicketAssignee, {
+	as: "AssigneeDepartment",
+	foreignKey: "AssigneeDepartmentId",
+});
+models.TicketAssignee.belongsTo(models.Department, {
+	as: "ApproverDepartment",
+	foreignKey: "ApproverDepartmentId",
+});
+models.TicketAssignee.belongsTo(models.Department, {
+	as: "AssigneeDepartment",
+	foreignKey: "AssigneeDepartmentId",
+});
 
-models.Line.hasMany(models.Ticket, { as: "RequesterLine", foreignKey: "RequesterLineId" });
-models.Ticket.belongsTo(models.Line, { as: "RequesterLine", foreignKey: "RequesterLineId" });
+models.Line.hasMany(models.Ticket, {
+	as: "RequesterLine",
+	foreignKey: "RequesterLineId",
+});
+models.Ticket.belongsTo(models.Line, {
+	as: "RequesterLine",
+	foreignKey: "RequesterLineId",
+});
 
-models.LedgerJig.hasOne(models.LedgerJigDetail, { onDelete: "CASCADE", onUpdate: "CASCADE" });
-models.LedgerJigDetail.belongsTo(models.LedgerJig, { onDelete: "CASCADE", onUpdate: "CASCADE" });
+models.LedgerJig.hasOne(models.LedgerJigDetail, {
+	onDelete: "CASCADE",
+	onUpdate: "CASCADE",
+});
+models.LedgerJigDetail.belongsTo(models.LedgerJig, {
+	onDelete: "CASCADE",
+	onUpdate: "CASCADE",
+});
 
-models.LedgerJigDetail.hasMany(models.LedgerJigDetailHistory, { onDelete: "CASCADE", onUpdate: "CASCADE" });
-models.LedgerJigDetailHistory.belongsTo(models.LedgerJigDetail, { onDelete: "CASCADE", onUpdate: "CASCADE" });
+models.LedgerJigDetail.hasMany(models.LedgerJigDetailHistory, {
+	onDelete: "CASCADE",
+	onUpdate: "CASCADE",
+});
+models.LedgerJigDetailHistory.belongsTo(models.LedgerJigDetail, {
+	onDelete: "CASCADE",
+	onUpdate: "CASCADE",
+});
 
 export default models;

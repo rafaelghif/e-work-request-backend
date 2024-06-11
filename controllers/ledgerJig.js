@@ -1,18 +1,19 @@
 import { validationResult } from "express-validator";
+import * as fs from "fs";
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
 import { Op } from "sequelize";
+import * as XLSX from "xlsx/xlsx.mjs";
+
+import connectionDatabase from "../configs/database.js";
 import { errorLogging } from "../helpers/error.js";
 import models from "../models/index.js";
-import * as XLSX from "xlsx/xlsx.mjs";
-import * as fs from "fs";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import connectionDatabase from "../configs/database.js";
 
 export const getJigs = async (req, res) => {
 	try {
 		const { search } = req.query;
 
-		let where = {}
+		let where = {};
 
 		if (search) {
 			where = {
@@ -22,19 +23,19 @@ export const getJigs = async (req, res) => {
 					{ name: { [Op.like]: `%${search}%` } },
 					{ location: { [Op.like]: `%${search}%` } },
 					{ remark: { [Op.like]: `%${search}%` } },
-					{ status: { [Op.like]: `%${search}%` } }
-				]
-			}
+					{ status: { [Op.like]: `%${search}%` } },
+				],
+			};
 		}
 
 		const response = await models.LedgerJig.findAll({
 			order: [["sequence", "DESC"]],
-			where
+			where,
 		});
 
 		return res.status(200).json({
 			message: "Success Fetch Ledger Jigs!",
-			data: response
+			data: response,
 		});
 	} catch (err) {
 		errorLogging(err.toString());
@@ -42,11 +43,11 @@ export const getJigs = async (req, res) => {
 			isExpressValidation: false,
 			data: {
 				title: "Something Wrong!",
-				message: err.toString()
-			}
+				message: err.toString(),
+			},
 		});
 	}
-}
+};
 
 export const getDetailJig = async (req, res) => {
 	try {
@@ -57,8 +58,8 @@ export const getDetailJig = async (req, res) => {
 				data: {
 					title: "Validation Errors!",
 					message: "Validation Error!",
-					validationError: errors.array()
-				}
+					validationError: errors.array(),
+				},
 			});
 		}
 
@@ -67,13 +68,13 @@ export const getDetailJig = async (req, res) => {
 		const response = await models.LedgerJigDetail.findAll({
 			order: [["regNo", "DESC"]],
 			where: {
-				LedgerJigId: jigId
-			}
+				LedgerJigId: jigId,
+			},
 		});
 
 		return res.status(200).json({
 			message: "Success Fetch Ledger Jigs Detail!",
-			data: response
+			data: response,
 		});
 	} catch (err) {
 		errorLogging(err.toString());
@@ -81,11 +82,11 @@ export const getDetailJig = async (req, res) => {
 			isExpressValidation: false,
 			data: {
 				title: "Something Wrong!",
-				message: err.toString()
-			}
+				message: err.toString(),
+			},
 		});
 	}
-}
+};
 
 export const getJigDetailHistory = async (req, res) => {
 	try {
@@ -94,13 +95,13 @@ export const getJigDetailHistory = async (req, res) => {
 		const response = await models.LedgerJigDetailHistory.findAll({
 			order: [["regNo", "DESC"]],
 			where: {
-				LedgerJigDetailId: jigDetailId
-			}
+				LedgerJigDetailId: jigDetailId,
+			},
 		});
 
 		return res.status(200).json({
 			message: "Success Fetch Ledger Jigs Detail History!",
-			data: response
+			data: response,
 		});
 	} catch (err) {
 		errorLogging(err.toString());
@@ -108,11 +109,11 @@ export const getJigDetailHistory = async (req, res) => {
 			isExpressValidation: false,
 			data: {
 				title: "Something Wrong!",
-				message: err.toString()
-			}
+				message: err.toString(),
+			},
 		});
 	}
-}
+};
 
 export const getLastSequence = async (req, res) => {
 	try {
@@ -124,13 +125,13 @@ export const getLastSequence = async (req, res) => {
 
 		if (!response) {
 			data = {
-				sequence: 0
-			}
+				sequence: 0,
+			};
 		}
 
 		return res.status(200).json({
 			message: "Success Fetch Last Sequence Ledger Jigs!",
-			data: data
+			data: data,
 		});
 	} catch (err) {
 		errorLogging(err.toString());
@@ -138,11 +139,11 @@ export const getLastSequence = async (req, res) => {
 			isExpressValidation: false,
 			data: {
 				title: "Something Wrong!",
-				message: err.toString()
-			}
+				message: err.toString(),
+			},
 		});
 	}
-}
+};
 
 export const createJig = async (req, res) => {
 	try {
@@ -153,12 +154,13 @@ export const createJig = async (req, res) => {
 				data: {
 					title: "Validation Errors!",
 					message: "Validation Error!",
-					validationError: errors.array()
-				}
+					validationError: errors.array(),
+				},
 			});
 		}
 
-		const { regNo, sequence, location, maker, name, qty, remark } = req.body;
+		const { regNo, sequence, location, maker, name, qty, remark } =
+			req.body;
 		const { badgeId } = req.decoded.user;
 
 		const response = await models.LedgerJig.create({
@@ -170,12 +172,12 @@ export const createJig = async (req, res) => {
 			qty,
 			remark,
 			createdBy: badgeId,
-			updatedBy: badgeId
+			updatedBy: badgeId,
 		});
 
 		return res.status(200).json({
-			message: `Success Create Jig!`,
-			data: response
+			message: "Success Create Jig!",
+			data: response,
 		});
 	} catch (err) {
 		errorLogging(err.toString());
@@ -183,11 +185,11 @@ export const createJig = async (req, res) => {
 			isExpressValidation: false,
 			data: {
 				title: "Something Wrong!",
-				message: err.toString()
-			}
+				message: err.toString(),
+			},
 		});
 	}
-}
+};
 
 export const createJigDetail = async (req, res) => {
 	try {
@@ -198,12 +200,24 @@ export const createJigDetail = async (req, res) => {
 				data: {
 					title: "Validation Errors!",
 					message: "Validation Error!",
-					validationError: errors.array()
-				}
+					validationError: errors.array(),
+				},
 			});
 		}
 
-		const { regNo, approveBy, checkedBy, makeBy, registrationDate, machineUse, partNo, partName, acquiredDate, location, LedgerJigId } = req.body;
+		const {
+			regNo,
+			approveBy,
+			checkedBy,
+			makeBy,
+			registrationDate,
+			machineUse,
+			partNo,
+			partName,
+			acquiredDate,
+			location,
+			LedgerJigId,
+		} = req.body;
 		const { badgeId } = req.decoded.user;
 
 		let fileName = undefined;
@@ -226,12 +240,12 @@ export const createJigDetail = async (req, res) => {
 			fileName,
 			createdBy: badgeId,
 			updatedBy: badgeId,
-			LedgerJigId: LedgerJigId
+			LedgerJigId: LedgerJigId,
 		});
 
 		return res.status(200).json({
-			message: `Success Create Jig Detail!`,
-			data: response
+			message: "Success Create Jig Detail!",
+			data: response,
 		});
 	} catch (err) {
 		errorLogging(err.toString());
@@ -239,11 +253,11 @@ export const createJigDetail = async (req, res) => {
 			isExpressValidation: false,
 			data: {
 				title: "Something Wrong!",
-				message: err.toString()
-			}
+				message: err.toString(),
+			},
 		});
 	}
-}
+};
 
 export const updateJig = async (req, res) => {
 	try {
@@ -254,29 +268,42 @@ export const updateJig = async (req, res) => {
 				data: {
 					title: "Validation Errors!",
 					message: "Validation Error!",
-					validationError: errors.array()
-				}
+					validationError: errors.array(),
+				},
 			});
 		}
 
-		const { id, regNo, sequence, location, maker, name, qty, remark, status } = req.body;
-		const { badgeId } = req.decoded.user;
-
-		const response = await models.LedgerJig.update({
+		const {
+			id,
 			regNo,
 			sequence,
-			name,
-			maker,
 			location,
+			maker,
+			name,
 			qty,
 			remark,
 			status,
-			updatedBy: badgeId
-		}, { where: { id } });
+		} = req.body;
+		const { badgeId } = req.decoded.user;
+
+		const response = await models.LedgerJig.update(
+			{
+				regNo,
+				sequence,
+				name,
+				maker,
+				location,
+				qty,
+				remark,
+				status,
+				updatedBy: badgeId,
+			},
+			{ where: { id } },
+		);
 
 		return res.status(200).json({
-			message: `Success Create Jig!`,
-			data: response
+			message: "Success Create Jig!",
+			data: response,
 		});
 	} catch (err) {
 		errorLogging(err.toString());
@@ -284,11 +311,11 @@ export const updateJig = async (req, res) => {
 			isExpressValidation: false,
 			data: {
 				title: "Something Wrong!",
-				message: err.toString()
-			}
+				message: err.toString(),
+			},
 		});
 	}
-}
+};
 
 export const updateJigDetail = async (req, res) => {
 	const transaction = await connectionDatabase.transaction();
@@ -300,41 +327,13 @@ export const updateJigDetail = async (req, res) => {
 				data: {
 					title: "Validation Errors!",
 					message: "Validation Error!",
-					validationError: errors.array()
-				}
+					validationError: errors.array(),
+				},
 			});
 		}
 
-		const { id, regNo, approveBy, checkedBy, makeBy, registrationDate, machineUse, partNo, partName, acquiredDate, location, LedgerJigId, remark } = req.body;
-		const { badgeId } = req.decoded.user;
-
-		let fileName = undefined;
-
-		if (req?.file?.filename) {
-			fileName = req.file.filename;
-		}
-
-		const ledgerDetail = await models.LedgerJigDetail.findByPk(id);
-
-		await models.LedgerJigDetailHistory.create({
-			regNo: ledgerDetail.regNo,
-			approveBy: ledgerDetail.approveBy,
-			checkedBy: ledgerDetail.checkedBy,
-			makeBy: ledgerDetail.makeBy,
-			registrationDate: ledgerDetail.registrationDate,
-			machineUse: ledgerDetail.machineUse,
-			partNo: ledgerDetail.partNo,
-			partName: ledgerDetail.partName,
-			acquiredDate: ledgerDetail.acquiredDate,
-			location: ledgerDetail.location,
-			fileName: ledgerDetail.fileName,
-			remark: remark,
-			createdBy: badgeId,
-			updatedBy: badgeId,
-			LedgerJigDetailId: ledgerDetail.id
-		}, { transaction });
-
-		const response = await models.LedgerJigDetail.update({
+		const {
+			id,
 			regNo,
 			approveBy,
 			checkedBy,
@@ -345,17 +344,65 @@ export const updateJigDetail = async (req, res) => {
 			partName,
 			acquiredDate,
 			location,
-			fileName,
-			createdBy: badgeId,
-			updatedBy: badgeId,
-			LedgerJigId: LedgerJigId
-		}, { where: { id }, transaction });
+			LedgerJigId,
+			remark,
+		} = req.body;
+		const { badgeId } = req.decoded.user;
+
+		let fileName = undefined;
+
+		if (req?.file?.filename) {
+			fileName = req.file.filename;
+		}
+
+		const ledgerDetail = await models.LedgerJigDetail.findByPk(id);
+
+		await models.LedgerJigDetailHistory.create(
+			{
+				regNo: ledgerDetail.regNo,
+				approveBy: ledgerDetail.approveBy,
+				checkedBy: ledgerDetail.checkedBy,
+				makeBy: ledgerDetail.makeBy,
+				registrationDate: ledgerDetail.registrationDate,
+				machineUse: ledgerDetail.machineUse,
+				partNo: ledgerDetail.partNo,
+				partName: ledgerDetail.partName,
+				acquiredDate: ledgerDetail.acquiredDate,
+				location: ledgerDetail.location,
+				fileName: ledgerDetail.fileName,
+				remark: remark,
+				createdBy: badgeId,
+				updatedBy: badgeId,
+				LedgerJigDetailId: ledgerDetail.id,
+			},
+			{ transaction },
+		);
+
+		const response = await models.LedgerJigDetail.update(
+			{
+				regNo,
+				approveBy,
+				checkedBy,
+				makeBy,
+				registrationDate,
+				machineUse,
+				partNo,
+				partName,
+				acquiredDate,
+				location,
+				fileName,
+				createdBy: badgeId,
+				updatedBy: badgeId,
+				LedgerJigId: LedgerJigId,
+			},
+			{ where: { id }, transaction },
+		);
 
 		transaction.commit();
 
 		return res.status(200).json({
-			message: `Success Update Jig Detail!`,
-			data: response
+			message: "Success Update Jig Detail!",
+			data: response,
 		});
 	} catch (err) {
 		transaction.rollback();
@@ -364,13 +411,14 @@ export const updateJigDetail = async (req, res) => {
 			isExpressValidation: false,
 			data: {
 				title: "Something Wrong!",
-				message: err.toString()
-			}
+				message: err.toString(),
+			},
 		});
 	}
-}
+};
 
 export const updateLedgerJig = async (req, res) => {
+	const transaction = await connectionDatabase.transaction();
 	try {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
@@ -379,42 +427,47 @@ export const updateLedgerJig = async (req, res) => {
 				data: {
 					title: "Validation Errors!",
 					message: "Validation Error!",
-					validationError: errors.array()
-				}
+					validationError: errors.array(),
+				},
 			});
 		}
 
 		const { id, name, maker, location, qty, remark, status } = req.body;
 		const { badgeId } = req.decoded.user;
 
-		const response = await models.LedgerJig.update({
-			name: name,
-			maker: maker,
-			location: location,
-			qty: qty,
-			remark: remark,
-			status: status,
-			updatedBy: badgeId
-		}, { where: { id: id }, transaction });
+		const response = await models.LedgerJig.update(
+			{
+				name: name,
+				maker: maker,
+				location: location,
+				qty: qty,
+				remark: remark,
+				status: status,
+				updatedBy: badgeId,
+			},
+			{ where: { id: id }, transaction },
+		);
 
 		return res.status(200).json({
-			message: `Success Update Ledger Jig!`,
-			data: response
+			message: "Success Update Ledger Jig!",
+			data: response,
 		});
 	} catch (err) {
+		await transaction.rollback();
 		errorLogging(err.toString());
 		return res.status(400).json({
 			isExpressValidation: false,
 			data: {
 				title: "Something Wrong!",
-				message: err.toString()
-			}
+				message: err.toString(),
+			},
 		});
 	}
-}
+};
 
 export const importOldJig = async (req, res) => {
-	const directoryPath = "D:/40703191/Programming/NodeJS/Personal/Ionic/e-work-request/e-work-request-backend/public/ledgers/old";
+	const directoryPath =
+		"D:/40703191/Programming/NodeJS/Personal/Ionic/e-work-request/e-work-request-backend/public/ledgers/old";
 	XLSX.set_fs(fs);
 
 	const filePath = path.join(directoryPath, "Jig Registration LIST.xlsx");
@@ -424,27 +477,37 @@ export const importOldJig = async (req, res) => {
 	const errorData = [];
 
 	for (const sheet of sheets) {
-		if (sheet.toUpperCase().includes("PAGE") || sheet.toUpperCase().includes("TIDAK PAKAI") || sheet.toUpperCase().includes("SHEET")) {
+		if (
+			sheet.toUpperCase().includes("PAGE") ||
+			sheet.toUpperCase().includes("TIDAK PAKAI") ||
+			sheet.toUpperCase().includes("SHEET")
+		) {
 			continue;
 		}
 
 		const rows = XLSX.utils.sheet_to_json(file.Sheets[sheet]);
 		for (const cols of rows) {
 			let {
-				"__EMPTY": name = "",
-				"__EMPTY_1": registrationNo = "",
-				"__EMPTY_2": maker = "",
-				"__EMPTY_3": location = "",
-				"__EMPTY_4": qty = 0,
-				"__EMPTY_5": remark = ""
+				__EMPTY: name = "",
+				__EMPTY_1: registrationNo = "",
+				__EMPTY_2: maker = "",
+				__EMPTY_3: location = "",
+				__EMPTY_4: qty = 0,
+				__EMPTY_5: remark = "",
 			} = cols;
 
-			const status = remark.toUpperCase().includes("SUPERSEDED") || remark.toUpperCase().includes("SPSD") ? "Superseded" : "Operation";
+			const status =
+				remark.toUpperCase().includes("SUPERSEDED") ||
+				remark.toUpperCase().includes("SPSD")
+					? "Superseded"
+					: "Operation";
 
-			if (registrationNo.trim() === "REG. NO" || registrationNo.trim() === "") {
+			if (
+				registrationNo.trim() === "REG. NO" ||
+				registrationNo.trim() === ""
+			) {
 				continue;
 			}
-
 
 			if (!registrationNo.includes("-")) {
 				if (registrationNo.trim().includes(" ")) {
@@ -467,24 +530,27 @@ export const importOldJig = async (req, res) => {
 					maker,
 					location,
 					qty: parseInt(qty),
-					remark
+					remark,
 				});
 				continue;
 			}
 
 			try {
-				await models.LedgerJig.create({
-					regNo: registrationNo.toUpperCase().trim(),
-					sequence: sequence,
-					name: name.trim(),
-					maker: maker.trim(),
-					location: location.trim(),
-					qty: parseInt(qty),
-					remark: remark.trim(),
-					status: status,
-					createdBy: "SYSTEM",
-					updatedBy: "SYSTEM"
-				}, { logging: false });
+				await models.LedgerJig.create(
+					{
+						regNo: registrationNo.toUpperCase().trim(),
+						sequence: sequence,
+						name: name.trim(),
+						maker: maker.trim(),
+						location: location.trim(),
+						qty: parseInt(qty),
+						remark: remark.trim(),
+						status: status,
+						createdBy: "SYSTEM",
+						updatedBy: "SYSTEM",
+					},
+					{ logging: false },
+				);
 			} catch (err) {
 				if (err.toString().includes("Data too long for column")) {
 					console.log({
@@ -494,7 +560,7 @@ export const importOldJig = async (req, res) => {
 						maker,
 						location,
 						qty: parseInt(qty),
-						remark
+						remark,
 					});
 				}
 				errorData.push({
@@ -504,7 +570,7 @@ export const importOldJig = async (req, res) => {
 					maker,
 					location,
 					qty: parseInt(qty),
-					remark
+					remark,
 				});
 				errorLogging(err.toString());
 			}
@@ -514,17 +580,23 @@ export const importOldJig = async (req, res) => {
 	await saveDataToCSV(errorData);
 
 	return res.status(200).send("Ok");
-}
+};
 
 const saveDataToCSV = async (data) => {
 	const csvHeader = "Sheet,Name,Registration No,Maker,Location,Qty,Remark\n";
-	const csvRows = data.map(item => (
-		`${item.sheet},"${item.name}","${item.registrationNo}","${item.maker}","${item.location}",${item.qty},"${item.remark}"`
-	)).join("\n");
+	const csvRows = data
+		.map(
+			(item) =>
+				`${item.sheet},"${item.name}","${item.registrationNo}","${item.maker}","${item.location}",${item.qty},"${item.remark}"`,
+		)
+		.join("\n");
 
 	const csvContent = csvHeader + csvRows;
 
-	const filePath = path.join("D:/40703191/Programming/NodeJS/Personal/Ionic/e-work-request/e-work-request-backend/logs/errors/error-data", "errorData.csv");
+	const filePath = path.join(
+		"D:/40703191/Programming/NodeJS/Personal/Ionic/e-work-request/e-work-request-backend/logs/errors/error-data",
+		"errorData.csv",
+	);
 	const directoryToCreate = path.dirname(filePath);
 
 	try {
@@ -535,4 +607,4 @@ const saveDataToCSV = async (data) => {
 	} catch (error) {
 		console.error("Error saving CSV file:", error);
 	}
-}
+};
