@@ -104,3 +104,19 @@ export const sendBackToAssigneeRule = [
 		.isArray()
 		.withMessage("Invalid TicketAssigneeIds"),
 ];
+
+export const cancelWorkRequestRule = [
+	body("ticketId")
+		.notEmpty()
+		.withMessage("TicketId Cannot Be Null!")
+		.isUUID("4")
+		.withMessage("Invalid TicketId"),
+];
+
+export const progressWorkRequestRule = [
+	body("ticketId")
+		.notEmpty()
+		.withMessage("TicketId Cannot Be Null!")
+		.isUUID("4")
+		.withMessage("Invalid TicketId"),
+];

@@ -3,6 +3,7 @@ import multer from "multer";
 
 import {
 	assignTicket,
+	cancelWorkRequest,
 	createWorkRequest,
 	getTicketNumber,
 	getTicketRequest,
@@ -20,6 +21,7 @@ import {
 	getWorkRequests,
 	headActionTicket,
 	picActionTicket,
+	progressWorkRequest,
 	receiveTicket,
 	sendBackToAssignee,
 	updateWorkRequest,
@@ -27,10 +29,12 @@ import {
 import { authVerify } from "../middlewares/auth.js";
 import {
 	assignTicketRule,
+	cancelWorkRequestRule,
 	createWorkRequestRule,
 	getWorkRequestCommentRule,
 	headActionTicketRule,
 	picActionTicketRule,
+	progressWorkRequestRule,
 	receiveTicketRule,
 	sendBackToAssigneeRule,
 	updateWorkRequestRule,
@@ -87,10 +91,12 @@ workRequestRouter.get("/ticket-number", [authVerify, getTicketNumber]);
 workRequestRouter.get("/", [authVerify, getWorkRequest]);
 workRequestRouter.get("/count", [authVerify, getWorkRequestCount]);
 workRequestRouter.get("/ticket-request", [authVerify, getTicketRequest]);
+
 workRequestRouter.get("/ticket-request/count", [
 	authVerify,
 	getTicketRequestCount,
 ]);
+
 workRequestRouter.get("/receive", [authVerify, getWorkRequestReceive]);
 workRequestRouter.get("/count-receive", [
 	authVerify,
@@ -132,6 +138,18 @@ workRequestRouter.patch("/sendBack", [
 	authVerify,
 	sendBackToAssigneeRule,
 	sendBackToAssignee,
+]);
+
+workRequestRouter.patch("/progress", [
+	authVerify,
+	progressWorkRequestRule,
+	progressWorkRequest,
+]);
+
+workRequestRouter.patch("/cancel", [
+	authVerify,
+	cancelWorkRequestRule,
+	cancelWorkRequest,
 ]);
 
 export default workRequestRouter;

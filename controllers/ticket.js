@@ -1,5 +1,5 @@
 import * as fns from "date-fns";
-import { validationResult } from "express-validator/src/validation-result.js";
+import { validationResult } from "express-validator";
 import * as fs from "fs";
 import path from "path";
 import { Op } from "sequelize";

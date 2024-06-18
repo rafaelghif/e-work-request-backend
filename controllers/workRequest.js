@@ -1,4 +1,4 @@
-import { validationResult } from "express-validator/src/validation-result.js";
+import { validationResult } from "express-validator";
 import { Op, QueryTypes } from "sequelize";
 
 import connectionDatabase from "../configs/database.js";
@@ -996,7 +996,7 @@ export const getWorkRequestIssued = async (req, res) => {
 			order: [["createdAt", "ASC"]],
 			where: {
 				createdBy: badgeId,
-				ticketStatus: "Waiting Approve",
+				ticketStatus: { [Op.notIn]: ["Reject", "Cancel"] },
 			},
 			include: [
 				{
@@ -1714,7 +1714,7 @@ export const sendMailCreateWorkRequest = async (
 
         <p>If you have any questions, please contact Razky.Josefa@yokogawa.com / Muhammad.Rafael@yokogawa.com / Erna.Nadira@yokogawa.com</p>
         <p>Information System Dept</p>
-        
+
         <p>Regards,</p>
         `;
 
@@ -1833,7 +1833,6 @@ export const sendBackToAssignee = async (req, res) => {
 		let commentText = `This ticket was send back to assignee by ${badgeId} - ${name}. ${remark}`;
 
 		for (const ticketAssigneeId of ticketAssigneeIds) {
-			console.log({ ticketAssigneeId });
 			await models.TicketAssignee.update(
 				{
 					status: "Progress",
@@ -1873,6 +1872,93 @@ export const sendBackToAssignee = async (req, res) => {
 		});
 	} catch (err) {
 		transaction.rollback();
+		errorLogging(err.toString());
+		return res.status(400).json({
+			isExpressValidation: false,
+			data: {
+				title: "Something Wrong!",
+				message: err.toString(),
+			},
+		});
+	}
+};
+
+export const cancelWorkRequest = async (req, res) => {
+	const transaction = await connectionDatabase.transaction();
+	try {
+		const { ticketId, cancelReason } = req.body;
+		const { id: userId, badgeId, name } = req.decoded.user;
+
+		await models.Ticket.update(
+			{
+				ticketStatus: "Cancel",
+				updatedBy: badgeId,
+			},
+			{
+				where: {
+					id: ticketId,
+				},
+				transaction: transaction,
+			},
+		);
+
+		await models.Comment.create(
+			{
+				title: "Cancel ticket",
+				text: `${badgeId} - ${name} was Ticket canceled with reason ${cancelReason}`,
+				TicketId: ticketId,
+				UserId: userId,
+				createdBy: badgeId,
+				updatedBy: badgeId,
+			},
+			{ transaction: transaction },
+		);
+
+		transaction.commit();
+
+		return res.status(200).json({
+			message: "Success Cancel Ticket",
+			data: null,
+		});
+	} catch (err) {
+		await transaction.rollback();
+		errorLogging(err.toString());
+		return res.status(400).json({
+			isExpressValidation: false,
+			data: {
+				title: "Something Wrong!",
+				message: err.toString(),
+			},
+		});
+	}
+};
+
+export const progressWorkRequest = async (req, res) => {
+	const transaction = await connectionDatabase.transaction();
+	try {
+		const { ticketId, progressRemark } = req.body;
+		const { id: userId, badgeId, name } = req.decoded.user;
+
+		await models.Comment.create(
+			{
+				title: "Requester remark",
+				text: `${badgeId} - ${name} ${progressRemark}`,
+				TicketId: ticketId,
+				UserId: userId,
+				createdBy: badgeId,
+				updatedBy: badgeId,
+			},
+			{ transaction: transaction },
+		);
+
+		transaction.commit();
+
+		return res.status(200).json({
+			message: "Success Update Ticket",
+			data: null,
+		});
+	} catch (err) {
+		await transaction.rollback();
 		errorLogging(err.toString());
 		return res.status(400).json({
 			isExpressValidation: false,
